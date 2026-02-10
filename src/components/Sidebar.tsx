@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import LoginModal from "./LoginModal";
 
 const navItems = [
@@ -77,6 +78,7 @@ export default function Sidebar({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { user, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
 
   return (
@@ -141,29 +143,67 @@ export default function Sidebar({
 
         {/* Bottom */}
         <div className="p-4 border-t border-border space-y-3">
-          {/* Login button */}
-          <button
-            onClick={() => setShowLogin(true)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-surface-hover border border-transparent hover:border-border transition-all group"
-          >
-            <span className="text-muted group-hover:text-accent transition-colors">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          {/* Auth Section */}
+          {user ? (
+            <div className="space-y-2">
+              <div className="px-3 py-2 rounded-lg bg-background/50 border border-border">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center border border-accent/20">
+                    <span className="text-accent text-xs font-bold">{user.email[0].toUpperCase()}</span>
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-[11px] font-bold text-foreground truncate">{user.email}</p>
+                    <p className="text-[9px] text-accent font-bold uppercase tracking-widest">{user.role}</p>
+                  </div>
+                </div>
+              </div>
+              {user.role === "admin" && (
+                <button
+                  onClick={() => onNavigate("admin-divider")}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-bold text-accent bg-accent/5 hover:bg-accent/10 border border-accent/20 transition-all"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                  Admin Panel
+                </button>
+              )}
+              <button
+                onClick={() => logout()}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-red-500 hover:bg-red-500/5 transition-all"
               >
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                <polyline points="10 17 15 12 10 7" />
-                <line x1="15" y1="12" x2="3" y2="12" />
-              </svg>
-            </span>
-            Sign In
-          </button>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowLogin(true)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-center text-muted-foreground hover:text-foreground hover:bg-surface-hover border border-transparent hover:border-border transition-all group"
+            >
+              <span className="text-muted group-hover:text-accent transition-colors">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                  <polyline points="10 17 15 12 10 7" />
+                  <line x1="15" y1="12" x2="3" y2="12" />
+                </svg>
+              </span>
+              Sign In
+            </button>
+          )}
 
           {/* Status */}
           <div className="flex items-center gap-2 text-xs text-muted">

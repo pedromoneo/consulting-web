@@ -26,7 +26,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const savedUser = localStorage.getItem("disruptor_user");
         if (savedUser) {
             try {
-                setUser(JSON.parse(savedUser));
+                const parsed = JSON.parse(savedUser);
+                // Re-verify role in case it was stored before roles were implemented
+                if (parsed.email === "pedro.moneo@gmail.com") {
+                    parsed.role = "admin";
+                } else if (!parsed.role) {
+                    parsed.role = "user";
+                }
+                setUser(parsed);
             } catch (e) {
                 console.error("Failed to parse saved user", e);
             }
@@ -34,9 +41,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const login = (email: string) => {
+        const normalizedEmail = email.trim().toLowerCase();
         const newUser: User = {
-            email,
-            role: email === "pedro.moneo@gmail.com" ? "admin" : "user",
+            email: normalizedEmail,
+            role: normalizedEmail === "pedro.moneo@gmail.com" ? "admin" : "user",
         };
         setUser(newUser);
         localStorage.setItem("disruptor_user", JSON.stringify(newUser));
