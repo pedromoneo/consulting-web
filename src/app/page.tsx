@@ -644,6 +644,13 @@ export default function Home() {
 
               <ChatMessage type="assistant" delay={100}>
                 <div className="space-y-8">
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground mb-3 font-mono tracking-tight">The AI-Native Advantage</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed italic border-l-2 border-accent pl-4">
+                      &quot;Traditional consultancies sell effort. We sell privileged intelligence.&quot;
+                    </p>
+                  </div>
+
                   {/* Top: 2-Column (Video | Pillars) */}
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
                     {/* Left: Video */}
@@ -662,12 +669,6 @@ export default function Home() {
 
                     {/* Right: Pillars in a Single Box */}
                     <div className="lg:col-span-3 space-y-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-foreground mb-3 font-mono tracking-tight">The AI-Native Advantage</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed italic border-l-2 border-accent pl-4">
-                          &quot;Traditional consultancies sell effort. We sell privileged intelligence.&quot;
-                        </p>
-                      </div>
 
                       <div className="bg-surface rounded-2xl border border-border p-5 shadow-sm">
                         <p className="text-sm text-foreground mb-4 font-medium px-1">
