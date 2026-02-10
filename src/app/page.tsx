@@ -658,7 +658,7 @@ export default function Home() {
                       <div className="relative aspect-[9/16] w-full rounded-2xl overflow-hidden border border-border bg-black shadow-2xl group">
                         <iframe
                           className="absolute inset-0 w-full h-full"
-                          src="https://www.youtube.com/embed/qdUdZiK9ws8?autoplay=0&mute=1&loop=1&playlist=qdUdZiK9ws8"
+                          src="https://www.youtube.com/embed/ceXvA2iqb2M?autoplay=0&mute=1&loop=1&playlist=ceXvA2iqb2M"
                           title="About Disruptor"
                           frameBorder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
