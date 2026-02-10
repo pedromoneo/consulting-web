@@ -10,6 +10,7 @@ import ChatInput from "../components/ChatInput";
 import ProfilePage from "../components/ProfilePage";
 import AIToolsPage from "../components/AIToolsPage";
 import AdminPanel from "../components/AdminPanel";
+import LoginModal from "../components/LoginModal";
 import { useAuth } from "@/context/AuthContext";
 
 const services = [
@@ -208,13 +209,22 @@ export default function Home() {
 
   const [activeSection, setActiveSection] = useState("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatInput, setChatInput] = useState("");
 
   const { user, loading: authLoading } = useAuth();
-  const { messages, sendMessage, status } = useChat();
+  const { messages, sendMessage, status, error: chatError } = useChat({
+    onError: (err) => {
+      console.error("Chat error:", err);
+    },
+  });
 
   const isLoading = status === "streaming" || status === "submitted" || authLoading;
+
+  useEffect(() => {
+    console.log("Messages state updated:", messages);
+  }, [messages]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -231,7 +241,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const sections = ["home", "services", "ideas", "cases", "aitools", "about", "hire", "talent", "profile"];
+    const sections = ["home", "services", "ideas", "cases", "aitools", "about", "hire", "talent", "profile", "admin-panel"];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -258,6 +268,7 @@ export default function Home() {
         onNavigate={handleNavigate}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onOpenLogin={() => setShowLogin(true)}
       />
 
       {/* Main Chat Area */}
@@ -293,12 +304,6 @@ export default function Home() {
         {/* Chat Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-            {user?.role === "admin" && (
-              <div className="mb-12">
-                <AdminPanel />
-                <SectionDivider id="admin-divider" />
-              </div>
-            )}
             {/* ========================= */}
             {/* SECTION: HERO / WELCOME   */}
             {/* ========================= */}
@@ -1005,23 +1010,6 @@ export default function Home() {
                 </ChatMessage>
               </div>
 
-              <ChatMessage type="assistant" delay={500}>
-                <div className="bg-surface rounded-xl border border-border p-5 text-center">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Interested? We&apos;d love to hear from you.
-                  </p>
-                  <a
-                    href="mailto:talent@disruptor.consulting"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-muted text-white text-sm font-medium rounded-lg transition-all"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <rect x="2" y="4" width="20" height="16" rx="2" />
-                      <path d="M22 7l-10 7L2 7" />
-                    </svg>
-                    talent@disruptor.consulting
-                  </a>
-                </div>
-              </ChatMessage>
             </section>
 
             <SectionDivider id="profile-divider" />
@@ -1031,7 +1019,7 @@ export default function Home() {
             {/* ========================= */}
             <section id="profile" className="scroll-mt-20">
               <ChatMessage type="assistant" delay={0}>
-                <ProfilePage />
+                <ProfilePage onOpenLogin={() => setShowLogin(true)} mode="join" />
               </ChatMessage>
             </section>
 
@@ -1043,10 +1031,8 @@ export default function Home() {
                 <SectionDivider id="chat-divider" />
                 <div className="space-y-0">
                   {messages.map((m) => {
-                    const text = m.parts
-                      ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-                      .map((p) => p.text)
-                      .join("") || "";
+                    console.log("Rendering message:", m);
+                    const text = m.parts?.map(p => p.type === 'text' ? (p as any).text : '').join('') || (m as any).text || (m as any).content || '';
                     return (
                       <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : ""} mb-6`}>
                         {m.role === "user" ? (
@@ -1059,7 +1045,7 @@ export default function Home() {
                             <p className="text-[10px] text-muted mt-1.5 text-right mr-2">You</p>
                           </div>
                         ) : (
-                          <div className="flex gap-3 max-w-4xl">
+                          <div className="flex gap-3 max-w-4xl chat-message">
                             <div className="flex-shrink-0 mt-1">
                               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent to-orange-600 flex items-center justify-center">
                                 <span className="text-white font-bold text-[10px] font-mono">D</span>
@@ -1116,6 +1102,12 @@ export default function Home() {
           />
         </div>
       </main>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+      />
     </div>
   );
 }

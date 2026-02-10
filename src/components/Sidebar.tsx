@@ -72,14 +72,15 @@ export default function Sidebar({
   onNavigate,
   isOpen,
   onClose,
+  onOpenLogin,
 }: {
   activeSection: string;
   onNavigate: (id: string) => void;
   isOpen: boolean;
   onClose: () => void;
+  onOpenLogin: () => void;
 }) {
   const { user, logout, loading } = useAuth();
-  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <>
@@ -159,7 +160,7 @@ export default function Sidebar({
               </div>
               {user.role === "admin" && (
                 <button
-                  onClick={() => onNavigate("admin-divider")}
+                  onClick={() => window.location.href = "/admin"}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-bold text-accent bg-accent/5 hover:bg-accent/10 border border-accent/20 transition-all"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -182,7 +183,7 @@ export default function Sidebar({
             </div>
           ) : (
             <button
-              onClick={() => setShowLogin(true)}
+              onClick={() => onOpenLogin()}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-center text-muted-foreground hover:text-foreground hover:bg-surface-hover border border-transparent hover:border-border transition-all group"
             >
               <span className="text-muted group-hover:text-accent transition-colors">
@@ -212,12 +213,6 @@ export default function Sidebar({
           </div>
         </div>
       </aside>
-
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={showLogin}
-        onClose={() => setShowLogin(false)}
-      />
     </>
   );
 }
