@@ -442,7 +442,7 @@ export default function Home() {
                     <div className="relative aspect-[9/16] w-full rounded-2xl overflow-hidden border border-border bg-black shadow-2xl group">
                       <iframe
                         className="absolute inset-0 w-full h-full"
-                        src="https://www.youtube.com/embed/_Pv231RCH2I?autoplay=0&mute=1&loop=1&playlist=_Pv231RCH2I"
+                        src="https://www.youtube.com/embed/qdUdZiK9ws8?autoplay=0&mute=1&loop=1&playlist=qdUdZiK9ws8"
                         title="Disruptor Services Overview"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
