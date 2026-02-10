@@ -3,23 +3,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-type LoginStep = "choose" | "otp-email" | "otp-verify";
+type LoginStep = "choose" | "magic-link-sent";
 
 export default function LoginModal({
     isOpen,
     onClose,
-    onSkip,
 }: {
     isOpen: boolean;
     onClose: () => void;
-    onSkip?: () => void;
 }) {
     const [step, setStep] = useState<LoginStep>("choose");
     const [email, setEmail] = useState("");
-    const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const { login } = useAuth();
+    const { loginWithGoogle, sendMagicLink } = useAuth();
 
     // Reset state when modal closes
     useEffect(() => {
@@ -27,23 +24,27 @@ export default function LoginModal({
             setTimeout(() => {
                 setStep("choose");
                 setEmail("");
-                setOtpCode(["", "", "", "", "", ""]);
                 setError("");
                 setIsLoading(false);
             }, 300);
         }
     }, [isOpen]);
 
-    const handleGoogleLogin = () => {
+    const handleGoogleLogin = async () => {
         setIsLoading(true);
-        // TODO: Implement actual Google OAuth
-        setTimeout(() => {
+        setError("");
+        try {
+            await loginWithGoogle();
+            onClose();
+        } catch (err: any) {
+            console.error("Google Login Error:", err);
+            setError(err.message || "Failed to login with Google");
+        } finally {
             setIsLoading(false);
-            alert("Google login integration coming soon");
-        }, 1000);
+        }
     };
 
-    const handleSendOtp = (e: React.FormEvent) => {
+    const handleSendMagicLink = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !email.includes("@")) {
             setError("Please enter a valid email address");
@@ -51,48 +52,15 @@ export default function LoginModal({
         }
         setError("");
         setIsLoading(true);
-        // TODO: Implement actual OTP sending
-        setTimeout(() => {
+        try {
+            await sendMagicLink(email);
+            setStep("magic-link-sent");
+        } catch (err: any) {
+            console.error("Magic Link Error:", err);
+            setError(err.message || "Failed to send magic link");
+        } finally {
             setIsLoading(false);
-            setStep("otp-verify");
-        }, 1000);
-    };
-
-    const handleOtpChange = (index: number, value: string) => {
-        if (value.length > 1) return;
-        const newCode = [...otpCode];
-        newCode[index] = value;
-        setOtpCode(newCode);
-
-        // Auto-focus next input
-        if (value && index < 5) {
-            const nextInput = document.getElementById(`otp-${index + 1}`);
-            nextInput?.focus();
         }
-    };
-
-    const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-        if (e.key === "Backspace" && !otpCode[index] && index > 0) {
-            const prevInput = document.getElementById(`otp-${index - 1}`);
-            prevInput?.focus();
-        }
-    };
-
-    const handleVerifyOtp = (e: React.FormEvent) => {
-        e.preventDefault();
-        const code = otpCode.join("");
-        if (code.length < 6) {
-            setError("Please enter the full 6-digit code");
-            return;
-        }
-        setError("");
-        setIsLoading(true);
-        // TODO: Implement actual OTP verification
-        setTimeout(() => {
-            setIsLoading(false);
-            login(email);
-            onClose();
-        }, 1000);
     };
 
     if (!isOpen) return null;
@@ -138,19 +106,12 @@ export default function LoginModal({
                         <div>
                             <h2 className="text-lg font-semibold text-foreground">
                                 {step === "choose" && "Sign in to Disruptor"}
-                                {step === "otp-email" && "Sign in with Email"}
-                                {step === "otp-verify" && "Enter verification code"}
+                                {step === "magic-link-sent" && "Check your inbox"}
                             </h2>
                             <p className="text-xs text-muted">
-                                {step === "choose" && "Access your consultancy dashboard"}
-                                {step === "otp-email" &&
-                                    "We'll send you a one-time verification code"}
-                                {step === "otp-verify" && (
-                                    <>
-                                        Sent to{" "}
-                                        <span className="text-foreground font-medium">{email}</span>
-                                    </>
-                                )}
+                                {step === "choose" && "Access your premium AI-native consultancy dashboard"}
+                                {step === "magic-link-sent" &&
+                                    `We've sent a magic login link to ${email}`}
                             </p>
                         </div>
                     </div>
@@ -160,12 +121,12 @@ export default function LoginModal({
                 <div className="px-8 pb-8">
                     {/* Step: Choose method */}
                     {step === "choose" && (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {/* Google Login */}
                             <button
                                 onClick={handleGoogleLogin}
                                 disabled={isLoading}
-                                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-border bg-white hover:bg-surface-hover transition-all text-sm font-medium text-foreground hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border border-border bg-white hover:bg-surface-hover transition-all text-sm font-bold text-foreground hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed group"
                             >
                                 <svg
                                     width="20"
@@ -190,213 +151,85 @@ export default function LoginModal({
                                         fill="#EA4335"
                                     />
                                 </svg>
-                                {isLoading ? "Connecting..." : "Continue with Google"}
+                                <span className="text-muted-foreground group-hover:text-foreground">Continue with Google</span>
                             </button>
 
                             {/* Divider */}
                             <div className="flex items-center gap-3 py-1">
                                 <div className="flex-1 h-px bg-border" />
-                                <span className="text-xs text-muted uppercase tracking-wider">
-                                    or
+                                <span className="text-[10px] text-muted uppercase tracking-widest font-bold">
+                                    or magic link
                                 </span>
                                 <div className="flex-1 h-px bg-border" />
                             </div>
 
-                            {/* OTP Login */}
-                            <button
-                                onClick={() => setStep("otp-email")}
-                                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-border bg-white hover:bg-surface-hover transition-all text-sm font-medium text-foreground hover:shadow-md hover:-translate-y-0.5"
-                            >
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                                </svg>
-                                Continue with Email Code
-                            </button>
+                            {/* Magic Link Form */}
+                            <form onSubmit={handleSendMagicLink} className="space-y-4">
+                                <div>
+                                    <label
+                                        htmlFor="login-email"
+                                        className="block text-[10px] font-bold text-muted uppercase tracking-widest mb-1.5"
+                                    >
+                                        Professional Email
+                                    </label>
+                                    <input
+                                        id="login-email"
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                            setError("");
+                                        }}
+                                        placeholder="you@company.com"
+                                        className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-foreground text-sm placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                                    />
+                                    {error && (
+                                        <p className="text-xs text-red-500 mt-1.5 text-center">{error}</p>
+                                    )}
+                                </div>
 
-                            {/* Skip for now */}
-                            {onSkip && (
                                 <button
-                                    onClick={() => {
-                                        onSkip();
-                                        onClose();
-                                    }}
-                                    className="w-full text-center text-xs text-muted hover:text-accent transition-colors py-2 mt-1"
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-accent to-orange-600 text-white text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20"
                                 >
-                                    Skip for now →
+                                    {isLoading ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                            </svg>
+                                            Sending...
+                                        </span>
+                                    ) : (
+                                        "Send Magic Link"
+                                    )}
                                 </button>
-                            )}
+                            </form>
                         </div>
                     )}
 
-                    {/* Step: Enter email for OTP */}
-                    {step === "otp-email" && (
-                        <form onSubmit={handleSendOtp} className="space-y-4">
-                            <div>
-                                <label
-                                    htmlFor="login-email"
-                                    className="block text-xs font-medium text-muted mb-1.5"
-                                >
-                                    Email address
-                                </label>
-                                <input
-                                    id="login-email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => {
-                                        setEmail(e.target.value);
-                                        setError("");
-                                    }}
-                                    placeholder="you@company.com"
-                                    autoFocus
-                                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface text-foreground text-sm placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
-                                />
-                                {error && (
-                                    <p className="text-xs text-red-500 mt-1.5">{error}</p>
-                                )}
+                    {/* Step: Magic Link Sent */}
+                    {step === "magic-link-sent" && (
+                        <div className="text-center space-y-6 animate-fade-in">
+                            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto text-accent">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                                </svg>
                             </div>
-
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full py-3 rounded-xl bg-gradient-to-r from-accent to-orange-600 text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20"
-                            >
-                                {isLoading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <svg
-                                            className="animate-spin h-4 w-4"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                                fill="none"
-                                            />
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                            />
-                                        </svg>
-                                        Sending code...
-                                    </span>
-                                ) : (
-                                    "Send verification code"
-                                )}
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setStep("choose");
-                                    setError("");
-                                }}
-                                className="w-full text-center text-xs text-muted hover:text-foreground transition-colors py-1"
-                            >
-                                ← Back to sign in options
-                            </button>
-                        </form>
-                    )}
-
-                    {/* Step: Verify OTP code */}
-                    {step === "otp-verify" && (
-                        <form onSubmit={handleVerifyOtp} className="space-y-4">
-                            <div>
-                                <div className="flex justify-center gap-2 mb-1">
-                                    {otpCode.map((digit, i) => (
-                                        <input
-                                            key={i}
-                                            id={`otp-${i}`}
-                                            type="text"
-                                            inputMode="numeric"
-                                            pattern="[0-9]*"
-                                            maxLength={1}
-                                            value={digit}
-                                            onChange={(e) => handleOtpChange(i, e.target.value)}
-                                            onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                                            autoFocus={i === 0}
-                                            className="w-12 h-14 text-center text-xl font-semibold rounded-xl border border-border bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
-                                        />
-                                    ))}
-                                </div>
-                                {error && (
-                                    <p className="text-xs text-red-500 mt-1.5 text-center">
-                                        {error}
-                                    </p>
-                                )}
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                    Click the link we&apos;ve sent to your email to sign in instantly.
+                                    Check your spam folder if it doesn&apos;t arrive in a minute.
+                                </p>
                             </div>
-
                             <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full py-3 rounded-xl bg-gradient-to-r from-accent to-orange-600 text-white text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-accent/20"
+                                onClick={() => setStep("choose")}
+                                className="text-xs text-accent hover:underline font-bold uppercase tracking-widest"
                             >
-                                {isLoading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <svg
-                                            className="animate-spin h-4 w-4"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                                fill="none"
-                                            />
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                            />
-                                        </svg>
-                                        Verifying...
-                                    </span>
-                                ) : (
-                                    "Verify & sign in"
-                                )}
+                                Try another method
                             </button>
-
-                            <div className="flex items-center justify-between">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setStep("otp-email");
-                                        setOtpCode(["", "", "", "", "", ""]);
-                                        setError("");
-                                    }}
-                                    className="text-xs text-muted hover:text-foreground transition-colors"
-                                >
-                                    ← Change email
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        // TODO: Resend OTP
-                                        setOtpCode(["", "", "", "", "", ""]);
-                                        setError("");
-                                    }}
-                                    className="text-xs text-accent hover:text-accent-muted transition-colors font-medium"
-                                >
-                                    Resend code
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     )}
                 </div>
             </div>

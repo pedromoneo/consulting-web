@@ -78,7 +78,7 @@ export default function Sidebar({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
 
   return (
@@ -207,8 +207,8 @@ export default function Sidebar({
 
           {/* Status */}
           <div className="flex items-center gap-2 text-xs text-muted">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span>AI systems online</span>
+            <div className={`w-2 h-2 rounded-full animate-pulse ${loading ? 'bg-orange-500' : 'bg-green-500'}`} />
+            <span>{loading ? 'Authenticating...' : 'AI systems online'}</span>
           </div>
         </div>
       </aside>
@@ -217,10 +217,6 @@ export default function Sidebar({
       <LoginModal
         isOpen={showLogin}
         onClose={() => setShowLogin(false)}
-        onSkip={() => {
-          onNavigate("profile");
-          onClose();
-        }}
       />
     </>
   );

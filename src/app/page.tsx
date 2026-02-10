@@ -211,10 +211,10 @@ export default function Home() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatInput, setChatInput] = useState("");
 
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { messages, sendMessage, status } = useChat();
 
-  const isLoading = status === "streaming" || status === "submitted";
+  const isLoading = status === "streaming" || status === "submitted" || authLoading;
 
   useEffect(() => {
     if (messages.length > 0) {
