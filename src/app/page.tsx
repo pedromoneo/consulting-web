@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import Sidebar from "../components/Sidebar";
 import ChatMessage from "../components/ChatMessage";
@@ -643,122 +643,104 @@ export default function Home() {
               </ChatMessage>
 
               <ChatMessage type="assistant" delay={100}>
-                <div className="mb-4">
-                  <p className="mb-4">
-                    We&apos;re built on{" "}
-                    <strong className="text-foreground">five pillars</strong> that
-                    collectively create a position no traditional consultancy can
-                    replicate:
-                  </p>
-                </div>
-              </ChatMessage>
-
-              <div className="space-y-3 mb-6">
-                {pillars.map((pillar, i) => (
-                  <ChatMessage key={i} type="assistant" delay={i * 100 + 200}>
-                    <div className="flex gap-4 bg-surface rounded-xl border border-border p-4 hover:border-border-light transition-all">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
-                        {pillar.icon}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-foreground mb-1">
-                          {pillar.title}
-                        </h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {pillar.desc}
-                        </p>
+                <div className="space-y-8">
+                  {/* Top: 2-Column (Video | Pillars) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    {/* Left: Video */}
+                    <div className="lg:col-span-2">
+                      <div className="relative aspect-[9/16] w-full rounded-2xl overflow-hidden border border-border bg-black shadow-2xl group">
+                        <iframe
+                          className="absolute inset-0 w-full h-full"
+                          src="https://www.youtube.com/embed/5X6O6u-C_7g?autoplay=0&mute=1&loop=1&playlist=5X6O6u-C_7g"
+                          title="About Disruptor"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
                       </div>
                     </div>
-                  </ChatMessage>
-                ))}
-              </div>
 
-              {/* Comparison Table */}
-              <ChatMessage type="assistant" delay={800}>
-                <div className="bg-surface rounded-xl border border-border overflow-hidden mb-2">
-                  <div className="p-4 border-b border-border">
-                    <h4 className="text-sm font-semibold text-foreground">
-                      Traditional vs. Disruptor
-                    </h4>
-                  </div>
-                  <div className="divide-y divide-border">
-                    {[
-                      ["Team Size", "8+ per project", "2\u20133 seniors + AI"],
-                      ["Expertise", "Mostly junior", "Elite throughout"],
-                      ["Speed", "Weeks", "Days"],
-                      ["Pricing", "Hourly billing", "Value-based"],
-                      ["Knowledge", "Walks out the door", "Embedded in AI"],
-                      ["Handoff", "None", "Executive placement"],
-                    ].map(([dimension, traditional, ours], i) => (
-                      <div
-                        key={i}
-                        className="grid grid-cols-3 text-xs py-2.5 px-4"
-                      >
-                        <span className="text-muted-foreground font-medium">
-                          {dimension}
-                        </span>
-                        <span className="text-muted line-through decoration-muted/40">
-                          {traditional}
-                        </span>
-                        <span className="text-accent font-medium">{ours}</span>
+                    {/* Right: Pillars in a Single Box */}
+                    <div className="lg:col-span-3 space-y-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-foreground mb-3 font-mono tracking-tight">The AI-Native Advantage</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed italic border-l-2 border-accent pl-4">
+                          &quot;Traditional consultancies sell effort. We sell privileged intelligence.&quot;
+                        </p>
                       </div>
-                    ))}
+
+                      <div className="bg-surface rounded-2xl border border-border p-5 shadow-sm">
+                        <p className="text-sm text-foreground mb-4 font-medium px-1">
+                          Our Five Core Pillars:
+                        </p>
+                        <div className="space-y-3">
+                          {pillars.map((pillar, i) => (
+                            <div key={i} className="flex gap-4 p-2.5 rounded-xl hover:bg-background/50 transition-all group">
+                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all transform group-hover:scale-105">
+                                {pillar.icon}
+                              </div>
+                              <div className="pt-0.5">
+                                <h4 className="text-[13px] font-bold text-foreground mb-0.5">{pillar.title}</h4>
+                                <p className="text-[11px] text-muted-foreground leading-relaxed">{pillar.desc}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Below: Single Column Layout */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Efficiency Benchmark */}
+                    <div className="bg-surface rounded-xl border border-accent/20 overflow-hidden shadow-inner">
+                      <div className="bg-accent/5 px-4 py-2 border-b border-border">
+                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Efficiency Benchmark</span>
+                      </div>
+                      <div className="divide-y divide-border">
+                        {[
+                          ["Team Size", "8+ per project", "2\u20133 seniors + AI"],
+                          ["Result Speed", "Weeks/Months", "Days/Weeks"],
+                          ["Pricing Model", "Hourly/Effort", "Value/Outcome"],
+                          ["Knowledge", "Leaves with team", "Embedded in AI"],
+                        ].map(([dim, trad, dsp], i) => (
+                          <div key={i} className="grid grid-cols-3 text-[10px] py-2.5 px-4 items-center group/row">
+                            <span className="text-muted-foreground font-medium group-hover/row:text-foreground transition-colors">{dim}</span>
+                            <span className="text-muted/40 line-through decoration-muted/20">{trad}</span>
+                            <span className="text-accent font-bold">{dsp}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Research Network */}
+                    <div className="bg-surface rounded-xl border border-border p-4">
+                      <h5 className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-3 px-1">University Research Network</h5>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { name: "RGI / Crummer", focus: "Innovation & Exec Ed", role: "Founding Alliance" },
+                          { name: "MIT", focus: "Deep Tech & AI Frontier", role: "Priority Expansion" },
+                          { name: "Georgia Tech", focus: "Applied AI & Engineering", role: "Priority Expansion" }
+                        ].map(uni => (
+                          <div key={uni.name} className="flex items-center justify-between p-2.5 bg-background/30 rounded-lg border border-border/50 hover:border-accent/20 transition-colors">
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-foreground">{uni.name}</span>
+                              <span className="text-[10px] text-muted">{uni.focus}</span>
+                            </div>
+                            <span className="text-[9px] px-2 py-0.5 bg-accent/5 text-accent rounded-full border border-accent/10">{uni.role}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </ChatMessage>
 
-              {/* University Partners */}
-              <ChatMessage type="assistant" delay={1000}>
-                <div className="bg-surface rounded-xl border border-border p-5">
-                  <h4 className="text-sm font-semibold text-foreground mb-3">
-                    University Research Network
-                  </h4>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Our privileged intelligence comes from deep partnerships with
-                    leading research institutions. Each adds unique capabilities to
-                    our federated knowledge network.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {[
-                      {
-                        name: "RGI / Crummer",
-                        role: "Founding Alliance",
-                        focus: "Innovation, Leadership, Exec Ed",
-                      },
-                      {
-                        name: "MIT",
-                        role: "Priority Expansion",
-                        focus: "Deep Tech, AI/ML, Frontier Research",
-                      },
-                      {
-                        name: "Georgia Tech",
-                        role: "Priority Expansion",
-                        focus: "Applied AI, Supply Chain, Engineering",
-                      },
-                    ].map((uni, i) => (
-                      <div
-                        key={i}
-                        className="bg-background rounded-lg border border-border p-3"
-                      >
-                        <div className="text-xs font-semibold text-foreground">
-                          {uni.name}
-                        </div>
-                        <div className="text-[10px] text-accent">{uni.role}</div>
-                        <div className="text-[10px] text-muted mt-1">
-                          {uni.focus}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ChatMessage>
-
-              {/* Contact info */}
-              <ChatMessage type="user" delay={1200}>
+              <ChatMessage type="user" delay={1000}>
                 How do I get in touch?
               </ChatMessage>
 
-              <ChatMessage type="assistant" delay={1300}>
+              <ChatMessage type="assistant" delay={1100}>
                 <div className="bg-gradient-to-br from-accent/10 to-orange-600/5 rounded-xl border border-accent/20 p-6">
                   <h4 className="text-lg font-semibold text-foreground mb-2">
                     Let&apos;s start a conversation.
