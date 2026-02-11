@@ -3,14 +3,21 @@
 import { useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
-export default function CreateIdeaForm() {
-    const [title, setTitle] = useState("");
-    const [tags, setTags] = useState("");
-    const [date, setDate] = useState("");
-    const [excerpt, setExcerpt] = useState("");
-    const [content, setContent] = useState("");
+interface IdeaFormProps {
+    initialData?: any;
+    onComplete?: () => void;
+    onCancel?: () => void;
+}
+
+export default function CreateIdeaForm({ initialData, onComplete, onCancel }: IdeaFormProps = {}) {
+    const [title, setTitle] = useState(initialData?.title || "");
+    const [tags, setTags] = useState(initialData?.tags?.join(", ") || "");
+    const [date, setDate] = useState(initialData?.date || "");
+    const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
+    const [content, setContent] = useState(initialData?.content || "");
+    const [status, setStatus] = useState(initialData?.status || "published");
     const [isUploading, setIsUploading] = useState(false);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,7 +32,7 @@ export default function CreateIdeaForm() {
 
             // Insert image markdown or HTML into content
             const imgTag = `\n![${file.name}](${url})\n`;
-            setContent(prev => prev + imgTag);
+            setContent((prev: string) => prev + imgTag);
         } catch (error) {
             console.error("Error uploading image:", error);
             alert("Failed to upload image.");
@@ -36,9 +43,9 @@ export default function CreateIdeaForm() {
 
     const formatText = (command: string) => {
         // Simple markdown helpers
-        if (command === 'bold') setContent(prev => prev + ' **text** ');
-        if (command === 'italic') setContent(prev => prev + ' *text* ');
-        if (command === 'h2') setContent(prev => prev + '\n## Heading\n');
+        if (command === 'bold') setContent((prev: string) => prev + ' **text** ');
+        if (command === 'italic') setContent((prev: string) => prev + ' *text* ');
+        if (command === 'h2') setContent((prev: string) => prev + '\n## Heading\n');
     };
 
     const [isSaving, setIsSaving] = useState(false);
@@ -52,25 +59,39 @@ export default function CreateIdeaForm() {
 
         setIsSaving(true);
         try {
-            await addDoc(collection(db, "ideas"), {
+            const data = {
                 title,
-                tags: tags.split(",").map(t => t.trim()),
+                tags: tags.split(",").map((t: string) => t.trim()),
                 date,
                 excerpt,
                 content,
-                createdAt: serverTimestamp(),
-            });
+                status,
+                updatedAt: serverTimestamp(),
+            };
 
-            setPublished(true);
-            setTitle("");
-            setTags("");
-            setDate("");
-            setExcerpt("");
-            setContent("");
+            if (initialData?.id) {
+                await updateDoc(doc(db, "ideas", initialData.id), data);
+                setPublished(true);
+            } else {
+                await addDoc(collection(db, "ideas"), {
+                    ...data,
+                    createdAt: serverTimestamp(),
+                });
+
+                setPublished(true);
+                setTitle("");
+                setTags("");
+                setDate("");
+                setExcerpt("");
+                setContent("");
+                setStatus("published");
+            }
+
+            if (onComplete) onComplete();
             setTimeout(() => setPublished(false), 5000);
         } catch (error) {
-            console.error("Error publishing idea:", error);
-            alert("Failed to publish idea.");
+            console.error("Error saving idea:", error);
+            alert("Failed to save idea.");
         } finally {
             setIsSaving(false);
         }
@@ -78,7 +99,9 @@ export default function CreateIdeaForm() {
 
     return (
         <div className="space-y-4">
-            <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">Create New Idea</h4>
+            <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                {initialData?.id ? "Edit Idea" : "Create New Idea"}
+            </h4>
             {published && (
                 <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-500 text-xs rounded-lg animate-fade-in">
                     Idea published successfully!
@@ -95,7 +118,20 @@ export default function CreateIdeaForm() {
                         placeholder="The Future of Consulting..."
                     />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Visibility</label>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className={`w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none appearance-none font-bold ${status === 'featured' ? 'text-accent' : status === 'published' ? 'text-green-500' : 'text-muted'
+                                }`}
+                        >
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                            <option value="featured">Featured</option>
+                        </select>
+                    </div>
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Tags (comma separated)</label>
                         <input
@@ -154,13 +190,23 @@ export default function CreateIdeaForm() {
                     />
                 </div>
 
-                <button
-                    onClick={handlePublish}
-                    disabled={isSaving}
-                    className="bg-accent hover:bg-accent-muted text-white text-xs font-bold py-3 rounded-lg transition-all shadow-lg shadow-accent/20 uppercase tracking-widest mt-2 disabled:opacity-50"
-                >
-                    {isSaving ? "Publishing..." : "Publish Idea"}
-                </button>
+                <div className="flex gap-3 mt-2">
+                    <button
+                        onClick={handlePublish}
+                        disabled={isSaving}
+                        className="flex-1 bg-accent hover:bg-accent-muted text-white text-xs font-bold py-3 rounded-lg transition-all shadow-lg shadow-accent/20 uppercase tracking-widest disabled:opacity-50"
+                    >
+                        {isSaving ? "Saving..." : initialData?.id ? "Update Idea" : "Publish Idea"}
+                    </button>
+                    {initialData?.id && (
+                        <button
+                            onClick={onCancel}
+                            className="bg-muted/20 hover:bg-muted/30 text-muted-foreground text-xs font-bold py-3 px-6 rounded-lg transition-all uppercase tracking-widest"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

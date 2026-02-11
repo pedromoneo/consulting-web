@@ -107,7 +107,7 @@ export default function UserManagement() {
             {/* Users Table */}
             <div className="border border-border rounded-xl overflow-hidden overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                    <thead className="bg-muted/50 border-b border-border">
+                    <thead className="bg-background border-b border-border">
                         <tr>
                             {[
                                 { key: 'name', label: 'Name' },
@@ -119,7 +119,7 @@ export default function UserManagement() {
                                 <th
                                     key={col.key}
                                     onClick={() => handleSort(col.key)}
-                                    className="px-4 py-3 font-semibold cursor-pointer hover:bg-muted transition-colors"
+                                    className="px-4 py-3 font-semibold cursor-pointer transition-colors hover:bg-white/50"
                                 >
                                     <div className="flex items-center gap-2">
                                         {col.label}
@@ -135,7 +135,7 @@ export default function UserManagement() {
                     </thead>
                     <tbody className="divide-y divide-border">
                         {filteredAndSortedUsers.map((u) => (
-                            <tr key={u.id} className="hover:bg-muted/30 transition-colors">
+                            <tr key={u.id} className="transition-colors hover:bg-white/50">
                                 <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{u.name}</td>
                                 <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
                                 <td className="px-4 py-3 text-muted-foreground">{u.company}</td>

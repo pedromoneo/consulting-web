@@ -3,14 +3,21 @@
 import { useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
-export default function CreateCaseForm() {
-    const [sector, setSector] = useState("");
-    const [title, setTitle] = useState("");
-    const [result, setResult] = useState("");
-    const [tags, setTags] = useState("");
-    const [description, setDescription] = useState("");
+interface CaseFormProps {
+    initialData?: any;
+    onComplete?: () => void;
+    onCancel?: () => void;
+}
+
+export default function CreateCaseForm({ initialData, onComplete, onCancel }: CaseFormProps = {}) {
+    const [sector, setSector] = useState(initialData?.sector || "");
+    const [title, setTitle] = useState(initialData?.title || "");
+    const [result, setResult] = useState(initialData?.result || "");
+    const [tags, setTags] = useState(initialData?.tags?.join(", ") || "");
+    const [description, setDescription] = useState(initialData?.description || "");
+    const [status, setStatus] = useState(initialData?.status || "published");
     const [isUploading, setIsUploading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [published, setPublished] = useState(false);
@@ -26,7 +33,7 @@ export default function CreateCaseForm() {
             const url = await getDownloadURL(storageRef);
 
             const imgTag = `\n![${file.name}](${url})\n`;
-            setDescription(prev => prev + imgTag);
+            setDescription((prev: string) => prev + imgTag);
         } catch (error) {
             console.error("Error uploading image:", error);
             alert("Failed to upload image.");
@@ -36,9 +43,9 @@ export default function CreateCaseForm() {
     };
 
     const formatText = (command: string) => {
-        if (command === 'bold') setDescription(prev => prev + ' **text** ');
-        if (command === 'italic') setDescription(prev => prev + ' *text* ');
-        if (command === 'h2') setDescription(prev => prev + '\n## Heading\n');
+        if (command === 'bold') setDescription((prev: string) => prev + ' **text** ');
+        if (command === 'italic') setDescription((prev: string) => prev + ' *text* ');
+        if (command === 'h2') setDescription((prev: string) => prev + '\n## Heading\n');
     };
 
     const handlePublish = async () => {
@@ -49,25 +56,39 @@ export default function CreateCaseForm() {
 
         setIsSaving(true);
         try {
-            await addDoc(collection(db, "cases"), {
+            const data = {
                 sector,
                 title,
                 result,
-                tags: tags.split(",").map(t => t.trim()),
+                tags: tags.split(",").map((t: string) => t.trim()),
                 description,
-                createdAt: serverTimestamp(),
-            });
+                status,
+                updatedAt: serverTimestamp(),
+            };
 
-            setPublished(true);
-            setSector("");
-            setTitle("");
-            setResult("");
-            setTags("");
-            setDescription("");
+            if (initialData?.id) {
+                await updateDoc(doc(db, "cases", initialData.id), data);
+                setPublished(true);
+            } else {
+                await addDoc(collection(db, "cases"), {
+                    ...data,
+                    createdAt: serverTimestamp(),
+                });
+
+                setPublished(true);
+                setSector("");
+                setTitle("");
+                setResult("");
+                setTags("");
+                setDescription("");
+                setStatus("published");
+            }
+
+            if (onComplete) onComplete();
             setTimeout(() => setPublished(false), 5000);
         } catch (error) {
-            console.error("Error publishing case:", error);
-            alert("Failed to publish case study.");
+            console.error("Error saving case:", error);
+            alert("Failed to save case study.");
         } finally {
             setIsSaving(false);
         }
@@ -75,7 +96,9 @@ export default function CreateCaseForm() {
 
     return (
         <div className="space-y-4">
-            <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">Create New Case Study</h4>
+            <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                {initialData?.id ? "Edit Case Study" : "Create New Case Study"}
+            </h4>
             {published && (
                 <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-500 text-xs rounded-lg animate-fade-in">
                     Case study published successfully!
@@ -106,7 +129,20 @@ export default function CreateCaseForm() {
                 </div>
 
                 {/* Result and Tags moved above Description */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Visibility</label>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className={`w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none appearance-none font-bold ${status === 'featured' ? 'text-accent' : status === 'published' ? 'text-green-500' : 'text-muted'
+                                }`}
+                        >
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                            <option value="featured">Featured</option>
+                        </select>
+                    </div>
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Measurable Result</label>
                         <input
@@ -156,13 +192,23 @@ export default function CreateCaseForm() {
                     />
                 </div>
 
-                <button
-                    onClick={handlePublish}
-                    disabled={isSaving}
-                    className="bg-accent hover:bg-accent-muted text-white text-xs font-bold py-3 rounded-lg transition-all shadow-lg shadow-accent/20 uppercase tracking-widest mt-2 disabled:opacity-50"
-                >
-                    {isSaving ? "Publishing..." : "Publish Case Study"}
-                </button>
+                <div className="flex gap-3 mt-2">
+                    <button
+                        onClick={handlePublish}
+                        disabled={isSaving}
+                        className="flex-1 bg-accent hover:bg-accent-muted text-white text-xs font-bold py-3 rounded-lg transition-all shadow-lg shadow-accent/20 uppercase tracking-widest disabled:opacity-50"
+                    >
+                        {isSaving ? "Saving..." : initialData?.id ? "Update Case Study" : "Publish Case Study"}
+                    </button>
+                    {initialData?.id && (
+                        <button
+                            onClick={onCancel}
+                            className="bg-muted/20 hover:bg-muted/30 text-muted-foreground text-xs font-bold py-3 px-6 rounded-lg transition-all uppercase tracking-widest"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

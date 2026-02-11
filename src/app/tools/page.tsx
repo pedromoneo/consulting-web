@@ -1,74 +1,45 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import DashboardLayout from "@/components/DashboardLayout";
 
-const allTools = [
-    {
-        id: "market-intel",
-        title: "Market Intelligence Dashboard",
-        description: "Real-time analysis of industry trends and competitor movement using our university research network proprietary data.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-        ),
-        link: "#",
-        status: "Beta",
-    },
-    {
-        id: "strategy-sim",
-        title: "Strategic Change Simulator",
-        description: "Model the impact of organizational shifts and market disruption before committing resources.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" />
-            </svg>
-        ),
-        link: "#",
-        status: "Internal Only",
-    },
-    {
-        id: "venture-canvas",
-        title: "Venture Builder Canvas",
-        description: "Accelerate startup building within corporate environments with our AI-augmented validation framework.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
-            </svg>
-        ),
-        link: "#",
-        status: "Live",
-    },
-    {
-        id: "talent-engine",
-        title: "Leadership Matching Engine",
-        description: "Align senior advisors and university fellows with complex business transformations using competency-based AI models.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" />
-            </svg>
-        ),
-        link: "#",
-        status: "Beta",
-    },
-];
+const DefaultIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </svg>
+);
 
 export default function ToolsPage() {
+    const [allTools, setAllTools] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTools = async () => {
+            try {
+                const q = query(collection(db, "tools"), where("status", "in", ["published", "featured"]));
+                const querySnapshot = await getDocs(q);
+                const tools = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setAllTools(tools);
+            } catch (error) {
+                console.error("Error fetching tools:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTools();
+    }, []);
+
     return (
-        <div className="min-h-screen bg-background text-foreground">
+        <DashboardLayout activeSection="aitools">
             <div className="container mx-auto px-4 py-16 max-w-6xl">
                 {/* Header */}
                 <div className="mb-12">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors mb-6"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 12H5M12 19l-7-7 7-7" />
-                        </svg>
-                        Back to Home
-                    </Link>
                     <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                         Tools
                     </h1>
@@ -86,16 +57,16 @@ export default function ToolsPage() {
                             className="group bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all cursor-pointer"
                         >
                             <div className="flex items-start justify-between mb-4">
-                                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300">
-                                    {tool.icon}
+                                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300 overflow-hidden">
+                                    {tool.iconUrl ? <img src={tool.iconUrl} className="w-full h-full object-cover" /> : <DefaultIcon />}
                                 </div>
-                                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${tool.status === "Live"
-                                        ? "bg-green-500/10 text-green-500 border-green-500/20"
-                                        : tool.status === "Beta"
-                                            ? "bg-accent/10 text-accent border-accent/20"
-                                            : "bg-muted/10 text-muted border-muted/20"
+                                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${tool.stage === "Live"
+                                    ? "bg-green-500/10 text-green-500 border-green-500/20"
+                                    : tool.stage === "Beta"
+                                        ? "bg-accent/10 text-accent border-accent/20"
+                                        : "bg-muted/10 text-muted border-muted/20"
                                     }`}>
-                                    {tool.status}
+                                    {tool.stage || tool.status}
                                 </span>
                             </div>
 
@@ -138,6 +109,6 @@ export default function ToolsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </DashboardLayout>
     );
 }

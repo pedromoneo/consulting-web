@@ -3,15 +3,22 @@
 import { useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
-export default function CreateToolForm() {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [link, setLink] = useState("");
-    const [status, setStatus] = useState("Beta");
+interface ToolFormProps {
+    initialData?: any;
+    onComplete?: () => void;
+    onCancel?: () => void;
+}
+
+export default function CreateToolForm({ initialData, onComplete, onCancel }: ToolFormProps = {}) {
+    const [title, setTitle] = useState(initialData?.title || "");
+    const [description, setDescription] = useState(initialData?.description || "");
+    const [link, setLink] = useState(initialData?.link || "");
+    const [stage, setStage] = useState(initialData?.stage || "Beta");
+    const [status, setStatus] = useState(initialData?.status || "published");
     const [isUploading, setIsUploading] = useState(false);
-    const [iconUrl, setIconUrl] = useState("");
+    const [iconUrl, setIconUrl] = useState(initialData?.iconUrl || "");
     const [isSaving, setIsSaving] = useState(false);
     const [published, setPublished] = useState(false);
 
@@ -41,25 +48,39 @@ export default function CreateToolForm() {
 
         setIsSaving(true);
         try {
-            await addDoc(collection(db, "tools"), {
+            const data = {
                 title,
                 description,
                 link,
+                stage,
                 status,
                 iconUrl,
-                createdAt: serverTimestamp(),
-            });
+                updatedAt: serverTimestamp(),
+            };
 
-            setPublished(true);
-            setTitle("");
-            setDescription("");
-            setLink("");
-            setStatus("Beta");
-            setIconUrl("");
+            if (initialData?.id) {
+                await updateDoc(doc(db, "tools", initialData.id), data);
+                setPublished(true);
+            } else {
+                await addDoc(collection(db, "tools"), {
+                    ...data,
+                    createdAt: serverTimestamp(),
+                });
+
+                setPublished(true);
+                setTitle("");
+                setDescription("");
+                setLink("");
+                setStage("Beta");
+                setStatus("published");
+                setIconUrl("");
+            }
+
+            if (onComplete) onComplete();
             setTimeout(() => setPublished(false), 5000);
         } catch (error) {
-            console.error("Error publishing tool:", error);
-            alert("Failed to publish tool.");
+            console.error("Error saving tool:", error);
+            alert("Failed to save tool.");
         } finally {
             setIsSaving(false);
         }
@@ -67,7 +88,9 @@ export default function CreateToolForm() {
 
     return (
         <div className="space-y-4">
-            <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">Create New Tool</h4>
+            <h4 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                {initialData?.id ? "Edit Tool" : "Create New Tool"}
+            </h4>
             {published && (
                 <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-500 text-xs rounded-lg animate-fade-in">
                     Tool published successfully!
@@ -86,10 +109,10 @@ export default function CreateToolForm() {
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Status</label>
+                        <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Stage</label>
                         <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
+                            value={stage}
+                            onChange={(e) => setStage(e.target.value)}
                             className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none appearance-none"
                         >
                             <option value="Live">Live</option>
@@ -101,6 +124,19 @@ export default function CreateToolForm() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Visibility Status</label>
+                        <select
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                            className={`w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none appearance-none font-bold ${status === 'featured' ? 'text-accent' : status === 'published' ? 'text-green-500' : 'text-muted'
+                                }`}
+                        >
+                            <option value="draft">Draft (Hidden)</option>
+                            <option value="published">Published</option>
+                            <option value="featured">Featured (Dashboard)</option>
+                        </select>
+                    </div>
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Link (Optional)</label>
                         <input
@@ -146,13 +182,23 @@ export default function CreateToolForm() {
                     />
                 </div>
 
-                <button
-                    onClick={handlePublish}
-                    disabled={isSaving}
-                    className="bg-accent hover:bg-accent-muted text-white text-xs font-bold py-3 rounded-lg transition-all shadow-lg shadow-accent/20 uppercase tracking-widest mt-2 disabled:opacity-50"
-                >
-                    {isSaving ? "Publishing..." : "Publish Tool"}
-                </button>
+                <div className="flex gap-3 mt-2">
+                    <button
+                        onClick={handlePublish}
+                        disabled={isSaving}
+                        className="flex-1 bg-accent hover:bg-accent-muted text-white text-xs font-bold py-3 rounded-lg transition-all shadow-lg shadow-accent/20 uppercase tracking-widest disabled:opacity-50"
+                    >
+                        {isSaving ? "Saving..." : initialData?.id ? "Update Tool" : "Publish Tool"}
+                    </button>
+                    {initialData?.id && (
+                        <button
+                            onClick={onCancel}
+                            className="bg-muted/20 hover:bg-muted/30 text-muted-foreground text-xs font-bold py-3 px-6 rounded-lg transition-all uppercase tracking-widest"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -1,56 +1,38 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-
-const allCases = [
-    {
-        slug: "market-intelligence-pe",
-        sector: "Private Equity",
-        title: "Market Intelligence for $2B Fund",
-        result: "Identified 3 acquisition targets in 6 weeks",
-        tags: ["Intelligence", "AI-Powered"],
-        description:
-            "Comprehensive sector mapping combining 25 expert interviews with AI-synthesized market data. Living dashboard replaced static quarterly reports.",
-        url: "/cases/market-intelligence-pe",
-    },
-    {
-        slug: "digital-transformation-healthcare",
-        sector: "Healthcare",
-        title: "Digital Transformation Roadmap",
-        result: "40% reduction in time-to-insight",
-        tags: ["Transformation", "AI Augmentation"],
-        description:
-            "Redesigned data infrastructure and decision-making processes for a regional healthcare system. Placed a Chief Digital Officer to carry forward.",
-        url: "/cases/digital-transformation-healthcare",
-    },
-    {
-        slug: "innovation-lab-manufacturing",
-        sector: "Manufacturing",
-        title: "Innovation Lab Launch",
-        result: "2 new ventures in Year 1",
-        tags: ["Innovation", "Venture Building"],
-        description:
-            "Built an internal innovation capability from scratch, including methodology, team, and first two venture concepts through to market validation.",
-        url: "/cases/innovation-lab-manufacturing",
-    },
-];
+import React, { useState, useEffect } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function CasesPage() {
+    const [allCases, setAllCases] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCases = async () => {
+            try {
+                const q = query(collection(db, "cases"), where("status", "in", ["published", "featured"]));
+                const querySnapshot = await getDocs(q);
+                const cases = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setAllCases(cases);
+            } catch (error) {
+                console.error("Error fetching cases:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCases();
+    }, []);
+
     return (
-        <div className="min-h-screen bg-background text-foreground">
+        <DashboardLayout activeSection="cases">
             <div className="container mx-auto px-4 py-16 max-w-6xl">
                 {/* Header */}
                 <div className="mb-12">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors mb-6"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 12H5M12 19l-7-7 7-7" />
-                        </svg>
-                        Back to Home
-                    </Link>
                     <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                         Case Studies
                     </h1>
@@ -62,10 +44,10 @@ export default function CasesPage() {
 
                 {/* Cases Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {allCases.map((c, i) => (
+                    {allCases.map((c) => (
                         <a
-                            key={i}
-                            href={c.url}
+                            key={c.id}
+                            href={c.url || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="block h-full"
@@ -75,7 +57,7 @@ export default function CasesPage() {
                                     <span className="text-[10px] uppercase tracking-wider font-bold text-muted bg-surface-hover px-2 py-0.5 rounded">
                                         {c.sector}
                                     </span>
-                                    {c.tags.map((tag, index) => (
+                                    {c.tags?.map((tag: string, index: number) => (
                                         <span
                                             key={index}
                                             className="text-[10px] uppercase tracking-wider font-bold text-accent bg-accent/10 px-2 py-0.5 rounded"
@@ -88,26 +70,28 @@ export default function CasesPage() {
                                     {c.title}
                                 </h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">
-                                    {c.description}
+                                    {c.description?.substring(0, 200)}
                                 </p>
 
-                                <div className="flex items-center gap-2 bg-accent/5 border border-accent/10 rounded-lg px-3 py-2 mb-4">
-                                    <svg
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        className="text-accent flex-shrink-0"
-                                    >
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                    <span className="text-xs font-bold text-foreground uppercase tracking-tight">
-                                        {c.result}
-                                    </span>
-                                </div>
+                                {c.result && (
+                                    <div className="flex items-center gap-2 bg-accent/5 border border-accent/10 rounded-lg px-3 py-2 mb-4">
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            className="text-accent flex-shrink-0"
+                                        >
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                            <polyline points="22 4 12 14.01 9 11.01" />
+                                        </svg>
+                                        <span className="text-xs font-bold text-foreground uppercase tracking-tight">
+                                            {c.result}
+                                        </span>
+                                    </div>
+                                )}
 
                                 <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
                                     <span className="text-xs font-bold text-accent uppercase tracking-widest">
@@ -130,6 +114,6 @@ export default function CasesPage() {
                     ))}
                 </div>
             </div>
-        </div>
+        </DashboardLayout>
     );
 }

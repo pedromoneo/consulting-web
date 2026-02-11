@@ -4,7 +4,7 @@ export const experts = [
         name: "Alex Morgan",
         role: "Senior Strategy Advisor",
         bio: "Former McKinsey Partner with 15+ years in digital transformation and AI strategy. Led 10+ Fortune 500 transformations.",
-        imageUrl: "https://ui-avatars.com/api/?name=Alex+Morgan&background=0D8ABC&color=fff",
+        imageUrl: "/images/experts/alex-morgan.png",
         linkedinUrl: "https://linkedin.com",
         tags: ["Strategy", "AI Transformation", "FMCG"]
     },
@@ -13,7 +13,7 @@ export const experts = [
         name: "Dr. Sarah Chen",
         role: "AI Research Lead",
         bio: "PhD in Machine Learning from Stanford. Specialized in NLP and Generative AI applications for enterprise.",
-        imageUrl: "https://ui-avatars.com/api/?name=Sarah+Chen&background=6B21A8&color=fff",
+        imageUrl: "/images/experts/sarah-chen.png",
         linkedinUrl: "https://linkedin.com",
         tags: ["NLP", "Generative AI", "Research"]
     },
@@ -22,7 +22,7 @@ export const experts = [
         name: "James Wilson",
         role: "Operational Excellence Expert",
         bio: "20 years optimizing supply chains using predictive analytics. Former COO of a major logistics firm.",
-        imageUrl: "https://ui-avatars.com/api/?name=James+Wilson&background=BE123C&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["Operations", "Supply Chain", "Analytics"]
     },
@@ -31,7 +31,7 @@ export const experts = [
         name: "Maria Garcia",
         role: "FinTech Innovation Lead",
         bio: "Led digital product launches for major banks. Expert in blockchain and decentralized finance systems.",
-        imageUrl: "https://ui-avatars.com/api/?name=Maria+Garcia&background=047857&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["FinTech", "Blockchain", "Product"]
     },
@@ -40,7 +40,7 @@ export const experts = [
         name: "David Kim",
         role: "Cybersecurity Specialist",
         bio: "Former CISO advising on AI risk management and secure infrastructure deployment for critical systems.",
-        imageUrl: "https://ui-avatars.com/api/?name=David+Kim&background=B45309&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["Security", "Risk", "Infrastructure"]
     },
@@ -49,7 +49,7 @@ export const experts = [
         name: "Elena Rossi",
         role: "Retail Innovation Director",
         bio: "Expert in personalized customer experiences and omnichannel strategy. 12 years in luxury retail leadership.",
-        imageUrl: "https://ui-avatars.com/api/?name=Elena+Rossi&background=C026D3&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["Retail", "CX", "Omnichannel"]
     },
@@ -58,7 +58,7 @@ export const experts = [
         name: "Marcus Johnson",
         role: "Energy Transition Advisor",
         bio: "Specializing in AI applications for grid optimization and renewable energy integration.",
-        imageUrl: "https://ui-avatars.com/api/?name=Marcus+Johnson&background=15803D&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["Energy", "Sustainability", "Grid AI"]
     },
@@ -67,7 +67,7 @@ export const experts = [
         name: "Dr. Sophia Lee",
         role: "Biotech Data Scientist",
         bio: "Pioneering use of generative models in drug discovery. Former lead data scientist at a major pharma co.",
-        imageUrl: "https://ui-avatars.com/api/?name=Sophia+Lee&background=4F46E5&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["Biotech", "Pharma", "Drug Discovery"]
     },
@@ -76,7 +76,7 @@ export const experts = [
         name: "Thomas Weber",
         role: "Automotive Tech Strategist",
         bio: "Focusing on autonomous systems and connected vehicle ecosystems. 20 years in German automotive sector.",
-        imageUrl: "https://ui-avatars.com/api/?name=Thomas+Weber&background=374151&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["Automotive", "Autonomous", "IoT"]
     },
@@ -85,7 +85,7 @@ export const experts = [
         name: "Priya Patel",
         role: "Marketing Analytics Lead",
         bio: "Helping CMOs leverage predictive modeling for customer acquisition and retention strategies.",
-        imageUrl: "https://ui-avatars.com/api/?name=Priya+Patel&background=DB2777&color=fff",
+        imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop",
         linkedinUrl: "https://linkedin.com",
         tags: ["Marketing", "Predictive Modeling", "Growth"]
     }

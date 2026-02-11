@@ -2,72 +2,22 @@
 
 import { useState, useEffect } from "react";
 
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-const staticTools = [
-    {
-        id: "market-intel",
-        title: "Market Intelligence Dashboard",
-        description: "Real-time analysis of industry trends and competitor movement using our university research network proprietary data.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-        ),
-        link: "#",
-        status: "Beta",
-    },
-    {
-        id: "strategy-sim",
-        title: "Strategic Change Simulator",
-        description: "Model the impact of organizational shifts and market disruption before committing resources.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" />
-            </svg>
-        ),
-        link: "#",
-        status: "Internal Only",
-    },
-    {
-        id: "venture-canvas",
-        title: "Venture Builder Canvas",
-        description: "Accelerate startup building within corporate environments with our AI-augmented validation framework.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
-            </svg>
-        ),
-        link: "#",
-        status: "Live",
-    },
-    {
-        id: "talent-engine",
-        title: "Leadership Matching Engine",
-        description: "Align senior advisors and university fellows with complex business transformations using competency-based AI models.",
-        icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" />
-            </svg>
-        ),
-        link: "#",
-        status: "Beta",
-    },
-];
-
 export default function AIToolsPage() {
-    const [tools, setTools] = useState<any[]>(staticTools);
+    const [tools, setTools] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchTools = async () => {
             try {
-                const querySnapshot = await getDocs(collection(db, "tools"));
+                const q = query(collection(db, "tools"), where("status", "==", "featured"));
+                const querySnapshot = await getDocs(q);
                 const dynamicTools = querySnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
-                setTools([...staticTools, ...dynamicTools]);
+                setTools(dynamicTools);
             } catch (error) {
                 console.error("Error fetching tools:", error);
             }
@@ -77,7 +27,7 @@ export default function AIToolsPage() {
     }, []);
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8">
             <div>
                 <h3 className="text-2xl font-bold text-foreground mb-2">Tools</h3>
                 <p className="text-muted-foreground max-w-2xl">
@@ -102,13 +52,13 @@ export default function AIToolsPage() {
                                 )}
                             </div>
                             <div className="flex-1" />
-                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${tool.status === "Live"
+                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${tool.stage === "Live"
                                 ? "bg-green-500/10 text-green-500"
-                                : tool.status === "Beta"
+                                : tool.stage === "Beta"
                                     ? "bg-accent/10 text-accent"
                                     : "bg-surface-hover text-muted"
                                 }`}>
-                                {tool.status}
+                                {tool.stage || tool.status}
                             </span>
                         </div>
 
