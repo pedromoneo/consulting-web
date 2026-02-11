@@ -599,8 +599,8 @@ export default function Home() {
                 </div>
               </ChatMessage>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {experts.slice(0, 4).map((expert, i) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {experts.slice(0, 6).map((expert, i) => (
                   <ChatMessage key={i} type="assistant" delay={i * 100 + 200}>
                     <div className="bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all h-full flex flex-col group">
                       <div className="flex items-center gap-4 mb-4">
