@@ -14,6 +14,7 @@ import LoginModal from "../components/LoginModal";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { experts } from "@/data/experts";
+import FadeIn from "@/components/FadeIn";
 
 const services = [
   {
@@ -601,7 +602,7 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 {experts.slice(0, 6).map((expert, i) => (
-                  <ChatMessage key={i} type="assistant" delay={i * 100 + 200}>
+                  <FadeIn key={i} delay={i * 100 + 200}>
                     <div className="bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all h-full flex flex-col group">
                       <div className="flex items-center gap-4 mb-4">
                         <div className="w-12 h-12 rounded-full overflow-hidden bg-accent/10">
@@ -632,7 +633,7 @@ export default function Home() {
                         </a>
                       </div>
                     </div>
-                  </ChatMessage>
+                  </FadeIn>
                 ))}
               </div>
 
@@ -676,7 +677,7 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {ideas.map((idea, i) => (
-                  <ChatMessage key={i} type="assistant" delay={i * 100 + 200}>
+                  <FadeIn key={i} delay={i * 100 + 200}>
                     <a
                       href={idea.url}
                       target="_blank"
@@ -720,7 +721,7 @@ export default function Home() {
                         </div>
                       </div>
                     </a>
-                  </ChatMessage>
+                  </FadeIn>
                 ))}
               </div>
 
@@ -765,7 +766,7 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {cases.map((c, i) => (
-                  <ChatMessage key={i} type="assistant" delay={i * 150 + 200}>
+                  <FadeIn key={i} delay={i * 150 + 200}>
                     <a
                       href={c.url}
                       target="_blank"
@@ -829,7 +830,7 @@ export default function Home() {
                         </div>
                       </div>
                     </a>
-                  </ChatMessage>
+                  </FadeIn>
                 ))}
               </div>
 
@@ -862,9 +863,9 @@ export default function Home() {
             {/* SECTION: AI TOOLS          */}
             {/* ========================= */}
             <section id="aitools" className="scroll-mt-3">
-              <ChatMessage type="assistant" delay={0}>
+              <FadeIn delay={0}>
                 <AIToolsPage />
-              </ChatMessage>
+              </FadeIn>
 
               {/* View More Link */}
               <div className="flex justify-center mt-2 mb-8">
@@ -954,7 +955,7 @@ export default function Home() {
               </ChatMessage>
 
 
-              <ChatMessage type="assistant" delay={200}>
+              <FadeIn delay={200}>
                 <div className="bg-surface rounded-xl border border-border p-5 mb-4">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                     {[
@@ -984,7 +985,7 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
-              </ChatMessage>
+              </FadeIn>
 
               <ChatMessage type="assistant" delay={300}>
                 <div className="bg-surface rounded-xl border border-border p-6">
