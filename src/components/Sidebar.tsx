@@ -8,14 +8,14 @@ import Link from "next/link";
 
 const navItems = [
   { id: "home", label: "Welcome", icon: "spark" },
+  { id: "model", label: "Our Model", icon: "model" },
   { id: "services", label: "Services", icon: "grid" },
+  { id: "experts", label: "Experts", icon: "users" },
   { id: "ideas", label: "Ideas", icon: "lightbulb" },
   { id: "cases", label: "Cases", icon: "folder" },
   { id: "aitools", label: "Tools", icon: "cpu" },
-  { id: "about", label: "About", icon: "users" },
   { id: "hire", label: "Hire Us", icon: "briefcase" },
   { id: "talent", label: "Join Us", icon: "star" },
-
 ];
 
 const icons: Record<string, React.ReactNode> = {
@@ -65,6 +65,13 @@ const icons: Record<string, React.ReactNode> = {
       <rect x="4" y="4" width="16" height="16" rx="2" />
       <rect x="9" y="9" width="6" height="6" />
       <path d="M15 2v2M9 2v2M20 15h2M20 9h2M9 20v2M15 20v2M2 9h2M2 15h2" />
+    </svg>
+  ),
+  model: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
     </svg>
   ),
 };

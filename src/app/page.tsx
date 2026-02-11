@@ -13,6 +13,7 @@ import AdminPanel from "../components/AdminPanel";
 import LoginModal from "../components/LoginModal";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { experts } from "@/data/experts";
 
 const services = [
   {
@@ -200,7 +201,8 @@ const placeholders = {
   ideas: "Ask about our latest research or thinking...",
   cases: "Would you like me to show you examples of our work in a particular industry?",
   aitools: "How can our tools help your team?",
-  about: "Ask about our senior expert architecture...",
+  model: "Ask about our senior expert architecture...",
+  experts: "Ask about our senior practitioners...",
   hire: "Tell us about a project you have in mind...",
   talent: "Ask about joining our expert network...",
   profile: "Ask about your recorded preferences...",
@@ -242,7 +244,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const sections = ["home", "services", "ideas", "cases", "aitools", "about", "hire", "talent", "admin-panel"];
+    const sections = ["home", "model", "services", "experts", "ideas", "cases", "aitools", "contact", "hire", "talent", "admin-panel"];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -369,6 +371,111 @@ export default function Home() {
               </ChatMessage>
             </section>
 
+            <SectionDivider id="model-divider" />
+
+            {/* ========================= */}
+            {/* SECTION: OUR MODEL        */}
+            {/* ========================= */}
+            <section id="model" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Our Model</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    Discover how Disruptor&apos;s senior expert architecture and AI-augmented approach sets us apart from traditional consultancies.
+                  </p>
+                </div>
+              </ChatMessage>
+
+              <ChatMessage type="assistant" delay={0}>
+                <div className="space-y-8">
+
+                  {/* Top: 2-Column (Video | Pillars) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    {/* Left: Video */}
+                    <div className="lg:col-span-2">
+                      <div className="relative aspect-[9/16] w-full rounded-2xl overflow-hidden border border-border bg-black shadow-2xl group">
+                        <iframe
+                          className="absolute inset-0 w-full h-full"
+                          src="https://www.youtube.com/embed/ceXvA2iqb2M?autoplay=0&mute=1&loop=1&playlist=ceXvA2iqb2M"
+                          title="About Disruptor"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    </div>
+
+                    {/* Right: Pillars in a Single Box */}
+                    <div className="lg:col-span-3 space-y-4">
+
+                      <div className="bg-surface rounded-2xl border border-border p-5 shadow-sm">
+                        <p className="text-sm text-foreground mb-4 font-medium px-1">
+                          Our Five Core Pillars:
+                        </p>
+                        <div className="space-y-3">
+                          {pillars.map((pillar, i) => (
+                            <div key={i} className="flex gap-4 p-2.5 rounded-xl hover:bg-background/50 transition-all group">
+                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all transform group-hover:scale-105">
+                                {pillar.icon}
+                              </div>
+                              <div className="pt-0.5">
+                                <h4 className="text-[13px] font-bold text-foreground mb-0.5">{pillar.title}</h4>
+                                <p className="text-[11px] text-muted-foreground leading-relaxed">{pillar.desc}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Below: Single Column Layout */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Efficiency Benchmark */}
+                    <div className="bg-surface rounded-xl border border-accent/20 overflow-hidden shadow-inner">
+                      <div className="bg-accent/5 px-4 py-2 border-b border-border">
+                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Efficiency Benchmark</span>
+                      </div>
+                      <div className="divide-y divide-border">
+                        {[
+                          ["Team Size", "8+ per project", "2\u20133 seniors + AI"],
+                          ["Result Speed", "Weeks/Months", "Days/Weeks"],
+                          ["Pricing Model", "Hourly/Effort", "Value/Outcome"],
+                          ["Knowledge", "Leaves with team", "Embedded in AI"],
+                        ].map(([dim, trad, dsp], i) => (
+                          <div key={i} className="grid grid-cols-3 text-[10px] py-2.5 px-4 items-center group/row">
+                            <span className="text-muted-foreground font-medium group-hover/row:text-foreground transition-colors">{dim}</span>
+                            <span className="text-muted/40 line-through decoration-muted/20">{trad}</span>
+                            <span className="text-accent font-bold">{dsp}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Research Network */}
+                    <div className="bg-surface rounded-xl border border-border p-4">
+                      <h5 className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-3 px-1">University Research Network</h5>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { name: "RGI / Crummer", focus: "Innovation & Exec Ed", role: "Founding Alliance" },
+                          { name: "MIT", focus: "Deep Tech & AI Frontier", role: "Priority Expansion" },
+                          { name: "Georgia Tech", focus: "Applied AI & Engineering", role: "Priority Expansion" }
+                        ].map(uni => (
+                          <div key={uni.name} className="flex items-center justify-between p-2.5 bg-background/30 rounded-lg border border-border/50 hover:border-accent/20 transition-colors">
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-foreground">{uni.name}</span>
+                              <span className="text-[10px] text-muted">{uni.focus}</span>
+                            </div>
+                            <span className="text-[9px] px-2 py-0.5 bg-accent/5 text-accent rounded-full border border-accent/10">{uni.role}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ChatMessage>
+            </section>
+
             <SectionDivider id="services-divider" />
 
             {/* ========================= */}
@@ -475,6 +582,80 @@ export default function Home() {
               </div>
 
 
+            </section>
+
+            <SectionDivider id="experts-divider" />
+
+            {/* ========================= */}
+            {/* SECTION: EXPERTS          */}
+            {/* ========================= */}
+            <section id="experts" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Experts</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    We deploy world-class senior practitioners across every engagement.
+                  </p>
+                </div>
+              </ChatMessage>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {experts.slice(0, 4).map((expert, i) => (
+                  <ChatMessage key={i} type="assistant" delay={i * 100 + 200}>
+                    <div className="bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all h-full flex flex-col group">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-accent/10">
+                          <img src={expert.imageUrl} alt={expert.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-foreground">{expert.name}</h4>
+                          <p className="text-xs text-muted-foreground">{expert.role}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed flex-1 mb-4">
+                        {expert.bio}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {expert.tags.map(tag => (
+                          <span key={tag} className="text-[10px] bg-accent/5 text-accent px-2 py-0.5 rounded border border-accent/10">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="mt-auto pt-3 border-t border-border flex justify-end">
+                        <a href={expert.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-[#0077b5] transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </ChatMessage>
+                ))}
+              </div>
+
+              <div className="flex justify-center mt-2 mb-8">
+                <a
+                  href="/experts"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-accent/10 hover:bg-accent/20 border border-accent/30 hover:border-accent rounded-lg text-sm font-semibold text-accent transition-all group"
+                >
+                  View More Experts
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="group-hover:translate-x-1 transition-transform"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </a>
+              </div>
             </section>
 
             <SectionDivider id="ideas-divider" />
@@ -707,109 +888,9 @@ export default function Home() {
                 </a>
               </div>
             </section>
-            <SectionDivider id="about-divider" />
+            <SectionDivider id="contact-divider" />
 
-            {/* ========================= */}
-            {/* SECTION: ABOUT            */}
-            {/* ========================= */}
-            <section id="about" className="scroll-mt-3">
-              <ChatMessage type="assistant" delay={0}>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground mb-2">About</h3>
-                  <p className="text-muted-foreground max-w-2xl mb-6">
-                    Discover how Disruptor's senior expert architecture and AI-augmented approach sets us apart from traditional consultancies.
-                  </p>
-                </div>
-              </ChatMessage>
-
-              <ChatMessage type="assistant" delay={0}>
-                <div className="space-y-8">
-
-                  {/* Top: 2-Column (Video | Pillars) */}
-                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-                    {/* Left: Video */}
-                    <div className="lg:col-span-2">
-                      <div className="relative aspect-[9/16] w-full rounded-2xl overflow-hidden border border-border bg-black shadow-2xl group">
-                        <iframe
-                          className="absolute inset-0 w-full h-full"
-                          src="https://www.youtube.com/embed/ceXvA2iqb2M?autoplay=0&mute=1&loop=1&playlist=ceXvA2iqb2M"
-                          title="About Disruptor"
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </div>
-                    </div>
-
-                    {/* Right: Pillars in a Single Box */}
-                    <div className="lg:col-span-3 space-y-4">
-
-                      <div className="bg-surface rounded-2xl border border-border p-5 shadow-sm">
-                        <p className="text-sm text-foreground mb-4 font-medium px-1">
-                          Our Five Core Pillars:
-                        </p>
-                        <div className="space-y-3">
-                          {pillars.map((pillar, i) => (
-                            <div key={i} className="flex gap-4 p-2.5 rounded-xl hover:bg-background/50 transition-all group">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all transform group-hover:scale-105">
-                                {pillar.icon}
-                              </div>
-                              <div className="pt-0.5">
-                                <h4 className="text-[13px] font-bold text-foreground mb-0.5">{pillar.title}</h4>
-                                <p className="text-[11px] text-muted-foreground leading-relaxed">{pillar.desc}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Below: Single Column Layout */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Efficiency Benchmark */}
-                    <div className="bg-surface rounded-xl border border-accent/20 overflow-hidden shadow-inner">
-                      <div className="bg-accent/5 px-4 py-2 border-b border-border">
-                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Efficiency Benchmark</span>
-                      </div>
-                      <div className="divide-y divide-border">
-                        {[
-                          ["Team Size", "8+ per project", "2\u20133 seniors + AI"],
-                          ["Result Speed", "Weeks/Months", "Days/Weeks"],
-                          ["Pricing Model", "Hourly/Effort", "Value/Outcome"],
-                          ["Knowledge", "Leaves with team", "Embedded in AI"],
-                        ].map(([dim, trad, dsp], i) => (
-                          <div key={i} className="grid grid-cols-3 text-[10px] py-2.5 px-4 items-center group/row">
-                            <span className="text-muted-foreground font-medium group-hover/row:text-foreground transition-colors">{dim}</span>
-                            <span className="text-muted/40 line-through decoration-muted/20">{trad}</span>
-                            <span className="text-accent font-bold">{dsp}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Research Network */}
-                    <div className="bg-surface rounded-xl border border-border p-4">
-                      <h5 className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-3 px-1">University Research Network</h5>
-                      <div className="grid grid-cols-1 gap-2">
-                        {[
-                          { name: "RGI / Crummer", focus: "Innovation & Exec Ed", role: "Founding Alliance" },
-                          { name: "MIT", focus: "Deep Tech & AI Frontier", role: "Priority Expansion" },
-                          { name: "Georgia Tech", focus: "Applied AI & Engineering", role: "Priority Expansion" }
-                        ].map(uni => (
-                          <div key={uni.name} className="flex items-center justify-between p-2.5 bg-background/30 rounded-lg border border-border/50 hover:border-accent/20 transition-colors">
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold text-foreground">{uni.name}</span>
-                              <span className="text-[10px] text-muted">{uni.focus}</span>
-                            </div>
-                            <span className="text-[9px] px-2 py-0.5 bg-accent/5 text-accent rounded-full border border-accent/10">{uni.role}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </ChatMessage>
+            <section id="contact" className="scroll-mt-3">
 
               <ChatMessage type="assistant" delay={0}>
                 <div>
