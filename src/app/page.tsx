@@ -15,6 +15,8 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { experts } from "@/data/experts";
 import FadeIn from "@/components/FadeIn";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const services = [
   {
@@ -216,6 +218,23 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatInput, setChatInput] = useState("");
+  const [allExperts, setAllExperts] = useState<any[]>(experts);
+
+  useEffect(() => {
+    const fetchExperts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "experts"));
+        const dynamicExperts = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setAllExperts([...experts, ...dynamicExperts]);
+      } catch (error) {
+        console.error("Error fetching experts:", error);
+      }
+    };
+    fetchExperts();
+  }, []);
 
   const { user, loading: authLoading } = useAuth();
   const { messages, sendMessage, status, error: chatError } = useChat({
@@ -601,7 +620,7 @@ export default function Home() {
               </ChatMessage>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                {experts.slice(0, 6).map((expert, i) => (
+                {allExperts.slice(0, 6).map((expert, i) => (
                   <FadeIn key={i} delay={i * 100 + 200}>
                     <div className="bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all h-full flex flex-col group">
                       <div className="flex items-center gap-4 mb-4">
@@ -618,7 +637,7 @@ export default function Home() {
                       </p>
 
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {expert.tags.map(tag => (
+                        {expert.tags.map((tag: any) => (
                           <span key={tag} className="text-[10px] bg-accent/5 text-accent px-2 py-0.5 rounded border border-accent/10">
                             {tag}
                           </span>

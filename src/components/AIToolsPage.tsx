@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const tools = [
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
+const staticTools = [
     {
         id: "market-intel",
         title: "Market Intelligence Dashboard",
@@ -54,8 +57,27 @@ const tools = [
 ];
 
 export default function AIToolsPage() {
+    const [tools, setTools] = useState<any[]>(staticTools);
+
+    useEffect(() => {
+        const fetchTools = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "tools"));
+                const dynamicTools = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setTools([...staticTools, ...dynamicTools]);
+            } catch (error) {
+                console.error("Error fetching tools:", error);
+            }
+        };
+
+        fetchTools();
+    }, []);
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fade-in">
             <div>
                 <h3 className="text-2xl font-bold text-foreground mb-2">Tools</h3>
                 <p className="text-muted-foreground max-w-2xl">
@@ -72,8 +94,12 @@ export default function AIToolsPage() {
                         className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer"
                     >
                         <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300">
-                                {tool.icon}
+                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300 overflow-hidden">
+                                {tool.iconUrl ? (
+                                    <img src={tool.iconUrl} alt={tool.title} className="w-full h-full object-cover" />
+                                ) : (
+                                    tool.icon
+                                )}
                             </div>
                             <div className="flex-1" />
                             <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${tool.status === "Live"

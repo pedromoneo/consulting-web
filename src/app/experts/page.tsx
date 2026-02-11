@@ -1,19 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { experts } from "@/data/experts";
+import { experts as staticExperts } from "@/data/experts";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function ExpertsPage() {
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
+    const [allExperts, setAllExperts] = useState<any[]>(staticExperts);
+
+    useEffect(() => {
+        const fetchExperts = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "experts"));
+                const dynamicExperts = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                // Merge static and dynamic, ensuring potentially unique IDs if needed
+                // Assuming static IDs are numeric strings and dynamic are UUID-like
+                setAllExperts([...staticExperts, ...dynamicExperts]);
+            } catch (error) {
+                console.error("Error fetching experts:", error);
+            }
+        };
+
+        fetchExperts();
+    }, []);
 
     // Get all unique tags
-    const allTags = Array.from(new Set(experts.flatMap(expert => expert.tags))).sort();
+    const allTags = Array.from(new Set(allExperts.flatMap((expert: any) => expert.tags))).sort();
 
     // Filter experts based on selected tag
     const filteredExperts = selectedTag
-        ? experts.filter(expert => expert.tags.includes(selectedTag))
-        : experts;
+        ? allExperts.filter(expert => expert.tags.includes(selectedTag))
+        : allExperts;
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -43,8 +65,8 @@ export default function ExpertsPage() {
                     <button
                         onClick={() => setSelectedTag(null)}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${selectedTag === null
-                                ? "bg-accent text-white"
-                                : "bg-surface hover:bg-surface-hover text-muted-foreground"
+                            ? "bg-accent text-white"
+                            : "bg-surface hover:bg-surface-hover text-muted-foreground"
                             }`}
                     >
                         All
@@ -54,8 +76,8 @@ export default function ExpertsPage() {
                             key={tag}
                             onClick={() => setSelectedTag(tag)}
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${selectedTag === tag
-                                    ? "bg-accent text-white"
-                                    : "bg-surface hover:bg-surface-hover text-muted-foreground"
+                                ? "bg-accent text-white"
+                                : "bg-surface hover:bg-surface-hover text-muted-foreground"
                                 }`}
                         >
                             {tag}
@@ -97,7 +119,7 @@ export default function ExpertsPage() {
                             </p>
 
                             <div className="flex flex-wrap gap-2 mt-auto">
-                                {expert.tags.map(tag => (
+                                {expert.tags.map((tag: any) => (
                                     <span
                                         key={tag}
                                         className="text-[10px] uppercase tracking-wider font-bold bg-accent/5 text-accent px-2 py-1 rounded border border-accent/10"
