@@ -165,10 +165,7 @@ export default function ProfilePage({
         <div className="space-y-8 pb-12">
             {/* Header */}
             <div>
-                <div className="inline-flex items-center gap-2 text-[10px] text-muted font-mono bg-surface px-3 py-1.5 rounded-full border border-border mb-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                    YOUR PROFILE
-                </div>
+
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-2">
                     Tell us about yourself
                 </h2>

@@ -12,6 +12,7 @@ import AIToolsPage from "../components/AIToolsPage";
 import AdminPanel from "../components/AdminPanel";
 import LoginModal from "../components/LoginModal";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 const services = [
   {
@@ -198,7 +199,7 @@ const placeholders = {
   services: "Which service horizon interests you most?",
   ideas: "Ask about our latest research or thinking...",
   cases: "Would you like me to show you examples of our work in a particular industry?",
-  aitools: "How can our AI tools help your team?",
+  aitools: "How can our tools help your team?",
   about: "Ask about our senior expert architecture...",
   hire: "Tell us about a project you have in mind...",
   talent: "Ask about joining our expert network...",
@@ -241,7 +242,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const sections = ["home", "services", "ideas", "cases", "aitools", "about", "hire", "talent", "profile", "admin-panel"];
+    const sections = ["home", "services", "ideas", "cases", "aitools", "about", "hire", "talent", "admin-panel"];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -285,12 +286,12 @@ export default function Home() {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
             <span className="text-xs font-mono text-muted">
               disruptor.consulting
             </span>
-          </div>
+          </Link>
           <div className="flex-1" />
           <div className="flex items-center gap-2 text-xs text-muted">
             <span className="hidden sm:inline">AI-Native Innovation & Transformation</span>
@@ -307,7 +308,7 @@ export default function Home() {
             {/* ========================= */}
             {/* SECTION: HERO / WELCOME   */}
             {/* ========================= */}
-            <section id="home" className="scroll-mt-20">
+            <section id="home" className="scroll-mt-3">
               <ChatMessage type="assistant">
                 <div className="mb-6">
                   <div className="inline-flex items-center gap-2 text-[10px] text-muted font-mono bg-surface px-3 py-1.5 rounded-full border border-border mb-6">
@@ -373,12 +374,17 @@ export default function Home() {
             {/* ========================= */}
             {/* SECTION: SERVICES         */}
             {/* ========================= */}
-            <section id="services" className="scroll-mt-20">
-              <ChatMessage type="user" delay={0}>
-                What services does Disruptor offer?
+            <section id="services" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Services</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    Discover our four service horizons designed to meet you where you are and take you where you need to go.
+                  </p>
+                </div>
               </ChatMessage>
 
-              <ChatMessage type="assistant" delay={100}>
+              <ChatMessage type="assistant" delay={0}>
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
                   {/* Left Column: Text Content */}
                   <div className="lg:col-span-3">
@@ -476,17 +482,16 @@ export default function Home() {
             {/* ========================= */}
             {/* SECTION: IDEAS            */}
             {/* ========================= */}
-            <section id="ideas" className="scroll-mt-20">
-              <ChatMessage type="user" delay={0}>
-                What&apos;s your latest thinking?
+            <section id="ideas" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Ideas</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    Our research team continuously synthesizes academic findings with market reality. Here's what we're thinking about right now.
+                  </p>
+                </div>
               </ChatMessage>
 
-              <ChatMessage type="assistant" delay={100}>
-                <p className="mb-4">
-                  Our research team continuously synthesizes academic findings
-                  with market reality. Here&apos;s what we&apos;re thinking about right now:
-                </p>
-              </ChatMessage>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {ideas.map((idea, i) => (
@@ -537,6 +542,28 @@ export default function Home() {
                   </ChatMessage>
                 ))}
               </div>
+
+              {/* View More Link */}
+              <div className="flex justify-center mt-2 mb-8">
+                <a
+                  href="/ideas"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-accent/10 hover:bg-accent/20 border border-accent/30 hover:border-accent rounded-lg text-sm font-semibold text-accent transition-all group"
+                >
+                  View More Ideas
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="group-hover:translate-x-1 transition-transform"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </a>
+              </div>
             </section>
 
             <SectionDivider id="cases-divider" />
@@ -544,17 +571,16 @@ export default function Home() {
             {/* ========================= */}
             {/* SECTION: CASES            */}
             {/* ========================= */}
-            <section id="cases" className="scroll-mt-20">
-              <ChatMessage type="user" delay={0}>
-                Can you show me examples of past work?
+            <section id="cases" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Cases</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    Every engagement produces documented, attributed results. Here are representative examples of the value we create.
+                  </p>
+                </div>
               </ChatMessage>
 
-              <ChatMessage type="assistant" delay={100}>
-                <p className="mb-4">
-                  Every engagement produces documented, attributed results.
-                  Here are representative examples of the value we create:
-                </p>
-              </ChatMessage>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {cases.map((c, i) => (
@@ -625,6 +651,28 @@ export default function Home() {
                   </ChatMessage>
                 ))}
               </div>
+
+              {/* View More Link */}
+              <div className="flex justify-center mt-2 mb-8">
+                <a
+                  href="/cases"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-accent/10 hover:bg-accent/20 border border-accent/30 hover:border-accent rounded-lg text-sm font-semibold text-accent transition-all group"
+                >
+                  View More Cases
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="group-hover:translate-x-1 transition-transform"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </a>
+              </div>
             </section>
 
             <SectionDivider id="aitools-divider" />
@@ -632,29 +680,50 @@ export default function Home() {
             {/* ========================= */}
             {/* SECTION: AI TOOLS          */}
             {/* ========================= */}
-            <section id="aitools" className="scroll-mt-20">
+            <section id="aitools" className="scroll-mt-3">
               <ChatMessage type="assistant" delay={0}>
                 <AIToolsPage />
               </ChatMessage>
+
+              {/* View More Link */}
+              <div className="flex justify-center mt-2 mb-8">
+                <a
+                  href="/tools"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-accent/10 hover:bg-accent/20 border border-accent/30 hover:border-accent rounded-lg text-sm font-semibold text-accent transition-all group"
+                >
+                  View All Tools
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="group-hover:translate-x-1 transition-transform"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </a>
+              </div>
             </section>
             <SectionDivider id="about-divider" />
 
             {/* ========================= */}
             {/* SECTION: ABOUT            */}
             {/* ========================= */}
-            <section id="about" className="scroll-mt-20">
-              <ChatMessage type="user" delay={0}>
-                How is Disruptor different from traditional consultancies?
+            <section id="about" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">About</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    Discover how Disruptor's senior expert architecture and AI-augmented approach sets us apart from traditional consultancies.
+                  </p>
+                </div>
               </ChatMessage>
 
-              <ChatMessage type="assistant" delay={100}>
+              <ChatMessage type="assistant" delay={0}>
                 <div className="space-y-8">
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground mb-3 font-mono tracking-tight">The AI-Native Advantage</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed italic border-l-2 border-accent pl-4">
-                      &quot;Traditional consultancies sell effort. We sell privileged intelligence.&quot;
-                    </p>
-                  </div>
 
                   {/* Top: 2-Column (Video | Pillars) */}
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
@@ -742,8 +811,13 @@ export default function Home() {
                 </div>
               </ChatMessage>
 
-              <ChatMessage type="user" delay={1000}>
-                How do I get in touch?
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Contact</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    Let's start a conversation. Reach out to discuss how we can help transform your organization.
+                  </p>
+                </div>
               </ChatMessage>
 
               <ChatMessage type="assistant" delay={1100}>
@@ -788,20 +862,16 @@ export default function Home() {
             {/* ========================= */}
             {/* SECTION: HIRE US          */}
             {/* ========================= */}
-            <section id="hire" className="scroll-mt-20">
-              <ChatMessage type="user" delay={0}>
-                I&apos;d like to engage Disruptor for a project. How do we get started?
-              </ChatMessage>
-
-              <ChatMessage type="assistant" delay={100}>
-                <div className="mb-4">
-                  <p className="mb-4">
-                    Every engagement begins with a conversation. Tell us about your
-                    challenge and we&apos;ll match you with the right senior experts and
-                    AI capabilities. Here&apos;s how it works:
+            <section id="hire" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Hire Us</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    Ready to transform your organization? Every engagement begins with a conversation.
                   </p>
                 </div>
               </ChatMessage>
+
 
               <ChatMessage type="assistant" delay={200}>
                 <div className="bg-surface rounded-xl border border-border p-5 mb-4">
@@ -916,19 +986,16 @@ export default function Home() {
             {/* ========================= */}
             {/* SECTION: TALENT / JOIN US */}
             {/* ========================= */}
-            <section id="talent" className="scroll-mt-20">
-              <ChatMessage type="user" delay={0}>
-                I&apos;m a senior expert / university fellow. How do I join?
-              </ChatMessage>
-
-              <ChatMessage type="assistant" delay={100}>
-                <div className="mb-4">
-                  <p className="mb-4">
-                    We&apos;re building a curated network of the world&apos;s best minds. There
-                    are two primary pathways:
+            <section id="talent" className="scroll-mt-3">
+              <ChatMessage type="assistant" delay={0}>
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Join Us</h3>
+                  <p className="text-muted-foreground max-w-2xl mb-6">
+                    We're building a curated network of the world's best minds. Discover the pathways to join our team.
                   </p>
                 </div>
               </ChatMessage>
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <ChatMessage type="assistant" delay={200}>
@@ -1010,18 +1077,18 @@ export default function Home() {
                 </ChatMessage>
               </div>
 
+              {/* Join Us Button */}
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="bg-accent hover:bg-accent-hover text-white font-semibold px-8 py-3 rounded-lg transition-all hover:shadow-lg hover:scale-105"
+                >
+                  Join Us
+                </button>
+              </div>
+
             </section>
 
-            <SectionDivider id="profile-divider" />
-
-            {/* ========================= */}
-            {/* SECTION: PROFILE           */}
-            {/* ========================= */}
-            <section id="profile" className="scroll-mt-20">
-              <ChatMessage type="assistant" delay={0}>
-                <ProfilePage onOpenLogin={() => setShowLogin(true)} mode="join" />
-              </ChatMessage>
-            </section>
 
             {/* ========================= */}
             {/* LIVE CONVERSATION        */}

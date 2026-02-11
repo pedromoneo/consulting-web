@@ -2,18 +2,20 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+
 import LoginModal from "./LoginModal";
+import Link from "next/link";
 
 const navItems = [
   { id: "home", label: "Welcome", icon: "spark" },
   { id: "services", label: "Services", icon: "grid" },
   { id: "ideas", label: "Ideas", icon: "lightbulb" },
   { id: "cases", label: "Cases", icon: "folder" },
-  { id: "aitools", label: "AI Tools", icon: "cpu" },
+  { id: "aitools", label: "Tools", icon: "cpu" },
   { id: "about", label: "About", icon: "users" },
   { id: "hire", label: "Hire Us", icon: "briefcase" },
   { id: "talent", label: "Join Us", icon: "star" },
-  { id: "profile", label: "Profile", icon: "profile" },
+
 ];
 
 const icons: Record<string, React.ReactNode> = {
@@ -97,21 +99,19 @@ export default function Sidebar({
           }`}
       >
         {/* Logo */}
-        <div className="p-5 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-orange-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm font-mono">D</span>
-            </div>
-            <div>
-              <h1 className="font-semibold text-sm tracking-wide text-foreground">
-                DISRUPTOR
-              </h1>
-              <p className="text-[10px] text-muted tracking-widest uppercase">
-                AI-Native Consultancy
-              </p>
-            </div>
+        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity p-5 border-b border-border">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-orange-600 flex items-center justify-center">
+            <span className="text-white font-bold text-sm font-mono">D</span>
           </div>
-        </div>
+          <div>
+            <h1 className="font-semibold text-sm tracking-wide text-foreground">
+              DISRUPTOR
+            </h1>
+            <p className="text-[10px] text-muted tracking-widest uppercase">
+              AI-Native Consultancy
+            </p>
+          </div>
+        </Link>
 
         {/* Nav */}
         <nav className="flex-1 p-3 space-y-1">
@@ -147,9 +147,12 @@ export default function Sidebar({
           {/* Auth Section */}
           {user ? (
             <div className="space-y-2">
-              <div className="px-3 py-2 rounded-lg bg-background/50 border border-border">
+              <div
+                className="px-3 py-2 rounded-lg bg-background/50 border border-border cursor-pointer hover:bg-surface-hover hover:border-accent/40 transition-all group"
+                onClick={() => window.location.href = "/profile"}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center border border-accent/20">
+                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center border border-accent/20 group-hover:border-accent transition-colors">
                     <span className="text-accent text-xs font-bold">{user.email[0].toUpperCase()}</span>
                   </div>
                   <div className="overflow-hidden">

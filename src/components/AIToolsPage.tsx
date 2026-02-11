@@ -57,7 +57,7 @@ export default function AIToolsPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">AI Tools</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Tools</h3>
                 <p className="text-muted-foreground max-w-2xl">
                     We build proprietary AI systems to augment our experts and provide
                     measurable advantages to our clients. Explore our ecosystem of internal
@@ -69,35 +69,45 @@ export default function AIToolsPage() {
                 {tools.map((tool) => (
                     <div
                         key={tool.id}
-                        className="group bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all cursor-pointer"
+                        className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer"
                     >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300">
                                 {tool.icon}
                             </div>
-                            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${tool.status === "Live"
-                                ? "bg-green-500/10 text-green-500 border-green-500/20"
+                            <div className="flex-1" />
+                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${tool.status === "Live"
+                                ? "bg-green-500/10 text-green-500"
                                 : tool.status === "Beta"
-                                    ? "bg-accent/10 text-accent border-accent/20"
-                                    : "bg-muted/10 text-muted border-muted/20"
+                                    ? "bg-accent/10 text-accent"
+                                    : "bg-surface-hover text-muted"
                                 }`}>
                                 {tool.status}
                             </span>
                         </div>
 
-                        <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
+                        <h4 className="text-base font-bold text-foreground mb-2 group-hover:text-accent transition-colors">
                             {tool.title}
                         </h4>
 
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                        <p className="text-xs text-muted-foreground leading-relaxed flex-1">
                             {tool.description}
                         </p>
 
-                        <div className="flex items-center gap-2 text-xs font-medium text-accent opacity-0 group-hover:opacity-100 transition-opacity">
-                            Access Tool
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                                <polyline points="12 5 19 12 12 19" />
+                        <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-accent uppercase tracking-widest">
+                                Access Tool
+                            </span>
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                className="text-muted group-hover:text-accent group-hover:translate-x-1 transition-all"
+                            >
+                                <path d="M7 17L17 7M17 7H7M17 7v10" />
                             </svg>
                         </div>
                     </div>
