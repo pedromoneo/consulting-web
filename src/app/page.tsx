@@ -14,7 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FadeIn from "@/components/FadeIn";
-import { collection, getDocs, query, where, limit, doc, setDoc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
+import { collection, getDocs, getDoc, query, where, limit, doc, setDoc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 const services = [
@@ -158,6 +158,45 @@ export default function Home() {
   // Manual chat implementation to bypass broken useChat hook
   const [messages, setMessages] = useState<any[]>([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [userContextString, setUserContextString] = useState("");
+
+  // Load User Profile and Chat History on Login
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (user?.uid) {
+        try {
+          // 1. Fetch User Profile for Context
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const d = userDoc.data();
+            const ctx = `Name: ${d.name || "Unknown"}\nEmail: ${d.email}\nRole: ${d.role || "User"}\nCompany: ${d.company || "N/A"}\nPosition: ${d.position || "N/A"}`;
+            setUserContextString(ctx);
+          }
+
+          // 2. Fetch Past Chat History
+          const chatDoc = await getDoc(doc(db, "users", user.uid, "chatHistory", "current"));
+          if (chatDoc.exists()) {
+            const history = chatDoc.data().messages || [];
+            if (history.length > 0) {
+              setMessages(prev => {
+                if (prev.length === 0) return history;
+                // Avoid duplication if possible, but for now prepend history
+                const uniqueHistory = history.filter((h: any) => !prev.some((p) => p.id === h.id));
+                return [...uniqueHistory, ...prev];
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load user data:", error);
+        }
+      } else {
+        // Clear chat history and context on logout
+        setMessages([]);
+        setUserContextString("");
+      }
+    };
+    loadUserData();
+  }, [user]);
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -191,7 +230,10 @@ export default function Home() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMsg] }),
+        body: JSON.stringify({
+          messages: [...messages, userMsg],
+          userContext: userContextString
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to send message");

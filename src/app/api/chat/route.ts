@@ -37,7 +37,7 @@ If the user wants to engage further, direct them to hello@disruptor.consulting.
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, userContext } = await req.json();
 
     // Check environment variable for API Key
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -54,6 +54,11 @@ export async function POST(req: Request) {
       }
     } catch (error) {
       console.warn("Failed to fetch system prompt:", error);
+    }
+
+    // Append User Context if provided
+    if (userContext) {
+      activeSystemPrompt += `\n\nUSER CONTEXT:\n${userContext}`;
     }
 
     // Initialize Google Generative AI Client
