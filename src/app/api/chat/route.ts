@@ -1,13 +1,11 @@
-import { google } from "@ai-sdk/google";
-import { streamText, tool } from "ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { z } from "zod";
 
 export const maxDuration = 30;
 
 const DEFAULT_SYSTEM_PROMPT = `You are the AI assistant for Disruptor, an AI-Native Innovation & Transformation Consultancy.
-Your goal is to help potential clients understand how we can solve their problems using our unique model.
+Your goal is to guide potential clients to understand their needs and how we can help, but you must do this sequentially, like a real human consultant.
 
 COMPANY PROFILE:
 - We deploy world-class senior experts augmented by AI to create measurable business value.
@@ -15,54 +13,110 @@ COMPANY PROFILE:
 - Service Areas: Intelligence (market research), Transformation (strategic change), Innovation (venture building), Handoff (executive placement).
 - Unique Value: University research network (knowledge 18-24mo ahead of market), Programmed Disconnection (we place a permanent leader to sustain work).
 
-INSTRUCTIONS:
+INTERACTION RULES:
+0. RESEARCH FIRST: Use Google Search to gather real-time context about the user's company or challenge BEFORE responding.
+1. ONE QUESTION AT A TIME: Never ask multiple questions in a single response. Wait for the user to answer before asking the next one.
+2. BE CONCISE: Keep responses short (1-3 sentences). Avoid long paragraphs.
+3. BE DIRECTIVE: Guide the conversation naturally.
+   - Start by understanding their company or role if unknown.
+   - Then, ask about their specific biggest challenge.
+   - Then, explain how our model fits that challenge.
+   - Finally, ask if they want to speak with an expert.
+4. TONE: Professional but conversational. Not robotic.
 
-1. SCOPE: ONLY discuss Disruptor, our services, our model, and the user's business challenges. Refuse to answer unrelated topics (e.g., "I can only assist with Disruptor-related inquiries.").
-2. BE DIRECTIVE: Your primary objective is to understand the user's specific problem.
-   - If the user says "Hi", ask: "Hello. Briefly, what is the biggest challenge your organization is facing right now?"
-   - If the user asks about services, explain briefly and then ask: "Which of these areas aligns most with your current needs?"
-3. BE USEFUL: Provide concise, high-value answers based on our model.
-4. CALL TO ACTION: Encourage them to define their problem clearly so we can determine if our senior experts + AI model is the right fit.
+EXAMPLE FLOW:
+User: "Hi"
+You: "Hello. To better assist you, could you briefly tell me about your role or company?"
+User: "I own a retail chain in Mexico."
+You: "That is interesting. What is the biggest challenge your retail chain is currently facing?"
+User: "Supply chain efficiency."
+You: "We specialize in Transformation. Our senior experts can optimize your supply chain using AI-driven insights. Would you like to explore how this would work?"
 
-If the user wants to engage, direct them to hello@disruptor.consulting.
+If the user wants to engage further, direct them to hello@disruptor.consulting.
 `;
 
 export async function POST(req: Request) {
   try {
-    const { messages, systemPrompt: clientProvidedPrompt } = await req.json();
-    console.log("Chat API called with", messages.length, "messages");
+    const { messages } = await req.json();
 
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      console.error("Missing GOOGLE_GENERATIVE_AI_API_KEY");
-      throw new Error("Missing API Key");
+    // Check environment variable for API Key
+    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    if (!apiKey) {
+      throw new Error("Missing GOOGLE_GENERATIVE_AI_API_KEY");
     }
 
-    let activeSystemPrompt = clientProvidedPrompt;
-
-    if (!activeSystemPrompt) {
-      // Try fetching from Firestore if not provided by client
-      try {
-        const docRef = doc(db, "tools", "chat-config"); // Read from tools collection as fallback
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().systemPrompt) {
-          activeSystemPrompt = docSnap.data().systemPrompt;
-          console.log("Using dynamic system prompt from Firestore (tools collection)");
-        }
-      } catch (err) {
-        console.warn("Failed to fetch dynamic system prompt, using default.", err);
+    // Fetch active system prompt from Firebase
+    let activeSystemPrompt = DEFAULT_SYSTEM_PROMPT;
+    try {
+      const promptDoc = await getDoc(doc(db, "tools", "chat-config"));
+      if (promptDoc.exists() && promptDoc.data().systemPrompt) {
+        activeSystemPrompt = promptDoc.data().systemPrompt;
       }
+    } catch (error) {
+      console.warn("Failed to fetch system prompt:", error);
     }
 
-    const result = streamText({
-      model: google("gemini-2.0-flash"),
-      system: activeSystemPrompt || DEFAULT_SYSTEM_PROMPT,
-      messages: messages.map((m: any) => ({
-        role: m.role,
-        content: m.content || "",
-      })),
+    // Initialize Google Generative AI Client
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    // Configure Model with Native Grounding (Search)
+    // Using gemini-2.0-flash as requested
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction: activeSystemPrompt,
+      tools: [
+        {
+          // @ts-ignore
+          googleSearch: {}, // Native Grounding enabled
+        },
+      ],
     });
 
-    return result.toTextStreamResponse();
+    // Transform messages to Gemini format
+    // Exclude the last message which is the current prompt
+    const history = messages.slice(0, -1).map((m: any) => ({
+      role: m.role === "user" ? "user" : "model",
+      parts: [{ text: m.content }],
+    }));
+
+    const lastMessageContent = messages[messages.length - 1].content;
+
+    // Start Chat Session
+    const chat = model.startChat({
+      history: history,
+      generationConfig: {
+        maxOutputTokens: 1000,
+      },
+    });
+
+    // Send Message and Stream Response
+    const result = await chat.sendMessageStream(lastMessageContent);
+
+    // Create ReadableStream for the response
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        try {
+          for await (const chunk of result.stream) {
+            const chunkText = chunk.text();
+            if (chunkText) {
+              controller.enqueue(encoder.encode(chunkText));
+            }
+          }
+        } catch (error) {
+          console.error("Stream error:", error);
+          controller.error(error);
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    });
+
   } catch (error) {
     console.error("Chat API Error:", error);
     return new Response(JSON.stringify({ error: String(error) }), { status: 500 });

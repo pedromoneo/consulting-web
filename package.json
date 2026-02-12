@@ -10,9 +10,10 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.40",
-    "@ai-sdk/google": "^3.0.23",
+    "@ai-sdk/google": "^3.0.29",
     "@ai-sdk/react": "^3.0.80",
-    "ai": "^6.0.78",
+    "@google/generative-ai": "^0.24.1",
+    "ai": "^6.0.84",
     "firebase": "^12.9.0",
     "framer-motion": "^12.34.0",
     "next": "16.1.6",

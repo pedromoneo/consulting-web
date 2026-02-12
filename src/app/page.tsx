@@ -162,6 +162,11 @@ export default function Home() {
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
 
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+
     const userMsg = { id: Date.now().toString(), role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setIsChatLoading(true);
@@ -333,7 +338,7 @@ export default function Home() {
                     No hours billed. No decks delivered. Just senior experts augmented by AI, with compensation tied to your outcomes.
                   </p>
                   <div className="flex flex-wrap gap-3">
-                    <button onClick={() => handleNavigate("services")} className="px-5 py-2.5 bg-accent hover:bg-accent-muted text-white text-sm font-medium rounded-lg transition-all">Explore Our Services</button>
+                    <button onClick={() => handleNavigate("hire")} className="px-5 py-2.5 bg-accent hover:bg-accent-muted text-white text-sm font-medium rounded-lg transition-all">Request Services</button>
                     <button
                       onClick={() => {
                         setPendingRedirect("/profile");
@@ -343,7 +348,7 @@ export default function Home() {
                     >
                       Join as Expert
                     </button>
-                    <button onClick={() => handleNavigate("about")} className="px-5 py-2.5 bg-surface hover:bg-surface-hover text-foreground text-sm font-medium rounded-lg border border-border transition-all">How We&apos;re Different</button>
+
                   </div>
                 </div>
               </div>
