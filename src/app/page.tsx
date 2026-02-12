@@ -786,7 +786,7 @@ export default function Home() {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 lg:left-64 right-0 p-4 bg-gradient-to-t from-background via-background/95 to-transparent pt-6 md:pt-12 z-10 transition-all">
+      <div className="fixed bottom-0 left-0 lg:left-64 right-0 p-4 bg-background border-t border-border z-10">
         <div className="max-w-3xl mx-auto">
           <ChatInput
             input={chatInput}
