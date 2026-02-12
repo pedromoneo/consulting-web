@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -15,8 +16,8 @@ export default function CasesPage() {
                 const q = query(collection(db, "cases"), where("status", "in", ["published", "featured"]));
                 const querySnapshot = await getDocs(q);
                 const cases = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    id: doc.id
                 }));
                 setAllCases(cases);
             } catch (error) {
@@ -45,14 +46,12 @@ export default function CasesPage() {
                 {/* Cases Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {allCases.map((c) => (
-                        <a
+                        <Link
                             key={c.id}
-                            href={c.url || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block h-full"
+                            href={`/cases/${c.id}`}
+                            className="block h-full group"
                         >
-                            <div className="group bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer">
+                            <div className="bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer">
                                 <div className="flex flex-wrap gap-2 mb-3">
                                     <span className="text-[10px] uppercase tracking-wider font-bold text-muted bg-surface-hover px-2 py-0.5 rounded">
                                         {c.sector}
@@ -70,7 +69,7 @@ export default function CasesPage() {
                                     {c.title}
                                 </h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">
-                                    {c.description?.substring(0, 200)}
+                                    {c.excerpt || c.description?.substring(0, 200)}
                                 </p>
 
                                 {c.result && (
@@ -110,7 +109,7 @@ export default function CasesPage() {
                                     </svg>
                                 </div>
                             </div>
-                        </a>
+                        </Link>
                     ))}
                 </div>
             </div>

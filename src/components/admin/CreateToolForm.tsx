@@ -13,6 +13,7 @@ interface ToolFormProps {
 
 export default function CreateToolForm({ initialData, onComplete, onCancel }: ToolFormProps = {}) {
     const [title, setTitle] = useState(initialData?.title || "");
+    const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
     const [description, setDescription] = useState(initialData?.description || "");
     const [link, setLink] = useState(initialData?.link || "");
     const [stage, setStage] = useState(initialData?.stage || "Beta");
@@ -50,6 +51,7 @@ export default function CreateToolForm({ initialData, onComplete, onCancel }: To
         try {
             const data = {
                 title,
+                excerpt,
                 description,
                 link,
                 stage,
@@ -69,6 +71,7 @@ export default function CreateToolForm({ initialData, onComplete, onCancel }: To
 
                 setPublished(true);
                 setTitle("");
+                setExcerpt("");
                 setDescription("");
                 setLink("");
                 setStage("Beta");
@@ -173,7 +176,17 @@ export default function CreateToolForm({ initialData, onComplete, onCancel }: To
                 </div>
 
                 <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Description</label>
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Excerpt (Short Summary)</label>
+                    <textarea
+                        value={excerpt}
+                        onChange={(e) => setExcerpt(e.target.value)}
+                        className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none h-16 resize-none"
+                        placeholder="Brief summary for list view..."
+                    />
+                </div>
+
+                <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Description (Full Text)</label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}

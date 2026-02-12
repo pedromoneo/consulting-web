@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { collection, addDoc, serverTimestamp, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, updateDoc, where, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { experts } from "@/data/experts";
 
@@ -263,6 +263,91 @@ export default function DataMigration() {
                         className="bg-accent hover:bg-accent-muted text-white px-6 py-2.5 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-accent/20 active:scale-95"
                     >
                         Sync Photo URLs
+                    </button>
+                )}
+            </div>
+
+            <div className="p-6 border border-dashed border-red-500/30 bg-red-500/5 rounded-xl shadow-inner">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center text-red-500">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-red-500">Cleanup Duplicates</h3>
+                        <p className="text-xs text-muted-foreground">Remove duplicate entries from all collections. Keeps the oldest version.</p>
+                    </div>
+                </div>
+
+                {status === "idle" && (
+                    <button
+                        onClick={async () => {
+                            if (!confirm("Are you sure you want to delete duplicate entries? This cannot be undone.")) return;
+                            setStatus("migrating");
+                            setLog([]);
+                            addLog("Starting cleanup...");
+
+                            try {
+                                const collections = ["experts", "tools", "ideas", "cases"];
+
+                                for (const colName of collections) {
+                                    addLog(`Checking ${colName}...`);
+                                    const q = query(collection(db, colName));
+                                    const snap = await getDocs(q);
+
+                                    const groups: Record<string, any[]> = {};
+
+                                    // Group by unique field (title or name)
+                                    snap.docs.forEach(doc => {
+                                        const data = doc.data();
+                                        const key = data.title || data.name || data.id; // Fallback to id if title/name missing
+                                        if (!key) return;
+
+                                        if (!groups[key]) groups[key] = [];
+                                        groups[key].push({ id: doc.id, ...data, createdAt: data.createdAt });
+                                    });
+
+                                    let deletedCount = 0;
+
+                                    for (const key in groups) {
+                                        const items = groups[key];
+                                        if (items.length > 1) {
+                                            // Sort by createdAt (oldest first)
+                                            items.sort((a, b) => {
+                                                const timeA = a.createdAt?.seconds || 0;
+                                                const timeB = b.createdAt?.seconds || 0;
+                                                return timeA - timeB;
+                                            });
+
+                                            // Keep first (oldest), delete rest
+                                            const toDelete = items.slice(1);
+
+                                            for (const item of toDelete) {
+                                                await deleteDoc(doc(db, colName, item.id));
+                                                deletedCount++;
+                                            }
+                                        }
+                                    }
+
+                                    if (deletedCount > 0) {
+                                        addLog(`Removed ${deletedCount} duplicates from ${colName}.`);
+                                    } else {
+                                        addLog(`No duplicates found in ${colName}.`);
+                                    }
+                                }
+
+                                setStatus("done");
+                                addLog("Cleanup complete.");
+                            } catch (e: any) {
+                                console.error(e);
+                                addLog(`Error cleanup: ${e.message || e}`);
+                                setStatus("error");
+                            }
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-red-500/20 active:scale-95"
+                    >
+                        Remove Duplicates
                     </button>
                 )}
             </div>

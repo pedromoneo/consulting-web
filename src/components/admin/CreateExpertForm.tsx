@@ -17,6 +17,7 @@ export default function CreateExpertForm({ initialData, onComplete, onCancel }: 
     const [bio, setBio] = useState(initialData?.bio || "");
     const [linkedinUrl, setLinkedinUrl] = useState(initialData?.linkedinUrl || "");
     const [tags, setTags] = useState(initialData?.tags?.join(", ") || "");
+    const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
     const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
     const [status, setStatus] = useState(initialData?.status || "published");
     const [isUploading, setIsUploading] = useState(false);
@@ -56,6 +57,7 @@ export default function CreateExpertForm({ initialData, onComplete, onCancel }: 
                 linkedinUrl,
                 imageUrl,
                 status,
+                excerpt,
                 tags: tags.split(",").map((t: string) => t.trim()).filter(Boolean),
                 updatedAt: serverTimestamp(),
             };
@@ -75,6 +77,7 @@ export default function CreateExpertForm({ initialData, onComplete, onCancel }: 
                 setBio("");
                 setLinkedinUrl("");
                 setTags("");
+                setExcerpt("");
                 setImageUrl("");
                 setStatus("published");
             }
@@ -185,6 +188,16 @@ export default function CreateExpertForm({ initialData, onComplete, onCancel }: 
                             )}
                         </div>
                     </div>
+                </div>
+
+                <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Excerpt (Short Summary)</label>
+                    <textarea
+                        value={excerpt}
+                        onChange={(e) => setExcerpt(e.target.value)}
+                        className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none h-16 resize-none"
+                        placeholder="Brief summary for list view..."
+                    />
                 </div>
 
                 <div className="space-y-1.5">

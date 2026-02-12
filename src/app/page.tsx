@@ -11,6 +11,7 @@ import ProfilePage from "../components/ProfilePage";
 import AIToolsPage from "../components/AIToolsPage";
 import AdminPanel from "../components/AdminPanel";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FadeIn from "@/components/FadeIn";
 import { collection, getDocs, query, where, limit } from "firebase/firestore";
@@ -121,11 +122,13 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatInput, setChatInput] = useState("");
   const [allExperts, setAllExperts] = useState<any[]>([]);
   const [featuredIdeas, setFeaturedIdeas] = useState<any[]>([]);
   const [featuredCases, setFeaturedCases] = useState<any[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -140,9 +143,9 @@ export default function Home() {
           getDocs(casesQuery)
         ]);
 
-        setAllExperts(expertsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setFeaturedIdeas(ideasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setFeaturedCases(casesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setAllExperts(expertsSnap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+        setFeaturedIdeas(ideasSnap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+        setFeaturedCases(casesSnap.docs.map(doc => ({ ...doc.data(), id: doc.id })));
       } catch (error) {
         console.error("Error fetching dashboard content:", error);
       }
@@ -156,6 +159,13 @@ export default function Home() {
   });
 
   const isLoading = status === "streaming" || status === "submitted" || authLoading;
+
+  useEffect(() => {
+    if (user && pendingRedirect) {
+      router.push(pendingRedirect);
+      setPendingRedirect(null);
+    }
+  }, [user, pendingRedirect, router]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -289,7 +299,7 @@ export default function Home() {
                     ].map(([dim, trad, dsp], i) => (
                       <div key={i} className="grid grid-cols-3 text-[10px] py-2.5 px-4 items-center group/row">
                         <span className="text-muted-foreground font-medium group-hover/row:text-foreground transition-colors">{dim}</span>
-                        <span className="text-muted/40 line-through decoration-muted/20">{trad}</span>
+                        <span className="text-foreground line-through decoration-muted/40">{trad}</span>
                         <span className="text-accent font-bold">{dsp}</span>
                       </div>
                     ))}
@@ -360,7 +370,7 @@ export default function Home() {
                         <p className="text-xs text-muted-foreground">{expert.role}</p>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-4">{expert.bio}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-4">{expert.excerpt || expert.bio}</p>
                     <div className="flex flex-col gap-3 mt-auto">
                       <div className="flex flex-wrap gap-2">
                         {expert.tags?.slice(0, 3).map((tag: string) => (
@@ -429,7 +439,7 @@ export default function Home() {
                       <span className="text-[10px] uppercase tracking-wider font-bold text-muted bg-surface-hover px-2 py-0.5 rounded">{c.sector}</span>
                     </div>
                     <h4 className="text-base font-bold group-hover:text-accent transition-colors mb-2">{c.title}</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-4">{c.description}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-4">{c.excerpt || c.description}</p>
                     <div className="flex items-center gap-2 bg-accent/5 border border-accent/10 rounded-lg px-3 py-1.5">
                       <span className="text-[10px] font-bold text-foreground uppercase tracking-tight">{c.result}</span>
                     </div>
@@ -453,6 +463,121 @@ export default function Home() {
             <AIToolsPage />
             <div className="flex justify-center mt-8">
               <Link href="/tools" className="px-6 py-3 bg-accent/10 hover:bg-accent/20 border border-accent/30 rounded-lg text-sm font-semibold text-accent transition-all">View All Tools</Link>
+            </div>
+          </ChatMessage>
+        </section>
+
+        <SectionDivider id="hire-divider" />
+
+        {/* ========================= */}
+        {/* SECTION: HIRE US          */}
+        {/* ========================= */}
+        <section id="hire" className="scroll-mt-3">
+          <ChatMessage type="assistant">
+            <h3 className="text-2xl font-bold mb-6">Engagement Models</h3>
+            <p className="text-muted-foreground max-w-2xl mb-8">
+              Choose the level of engagement that fits your strategic velocity.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all group">
+                <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3">The Sprint</div>
+                <h4 className="text-lg font-bold text-foreground mb-2">Diagnostic & Strategy</h4>
+                <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                  A 2-week intensive deep dive to answer a critical strategic question or validate a hypothesis.
+                </p>
+                <ul className="text-[10px] space-y-2 mb-4 text-muted-foreground">
+                  <li className="flex gap-2"><span className="text-accent">✓</span> Market Intelligence Scan</li>
+                  <li className="flex gap-2"><span className="text-accent">✓</span> 5 Senior Expert Interviews</li>
+                  <li className="flex gap-2"><span className="text-accent">✓</span> Strategic Roadmap</li>
+                </ul>
+              </div>
+
+              <div className="bg-surface rounded-xl border border-accent/30 p-5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 bg-accent text-white text-[9px] font-bold px-2 py-1 rounded-bl-lg uppercase tracking-wider">Most Popular</div>
+                <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3">The Transformation</div>
+                <h4 className="text-lg font-bold text-foreground mb-2">Execution & Change</h4>
+                <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                  End-to-end partnership to implement a major organizational shift or launch a new venture.
+                </p>
+                <ul className="text-[10px] space-y-2 mb-4 text-muted-foreground">
+                  <li className="flex gap-2"><span className="text-accent">✓</span> Dedicated Squad (3 Experts + AI)</li>
+                  <li className="flex gap-2"><span className="text-accent">✓</span> 90-Day Execution Sprints</li>
+                  <li className="flex gap-2"><span className="text-accent">✓</span> Outcome-Based Fees</li>
+                </ul>
+              </div>
+
+              <div className="bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all group">
+                <div className="text-xs font-bold text-accent uppercase tracking-widest mb-3">The Advisory</div>
+                <h4 className="text-lg font-bold text-foreground mb-2">On-Demand Access</h4>
+                <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                  Monthly hour packages providing on-demand access to our expert network and proprietary AI tools.
+                </p>
+                <ul className="text-[10px] space-y-2 mb-4 text-muted-foreground">
+                  <li className="flex gap-2"><span className="text-accent">✓</span> Unlimited AI Tool Access</li>
+                  <li className="flex gap-2"><span className="text-accent">✓</span> Flexible Expert Hours</li>
+                  <li className="flex gap-2"><span className="text-accent">✓</span> Priority Response SLA</li>
+                </ul>
+              </div>
+            </div>
+          </ChatMessage>
+        </section>
+
+        <SectionDivider id="talent-divider" />
+
+        {/* ========================= */}
+        {/* SECTION: JOIN US (TALENT) */}
+        {/* ========================= */}
+        <section id="talent" className="scroll-mt-3">
+          <ChatMessage type="assistant">
+            <h3 className="text-2xl font-bold mb-6">Join the Network</h3>
+            <div className="bg-gradient-to-r from-surface to-surface-hover rounded-xl border border-border overflow-hidden">
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="p-8 flex flex-col justify-center">
+                  <h4 className="text-xl font-bold mb-4">Are you a top 1% expert?</h4>
+                  <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                    The future of consulting is decentralized. We are building the world&apos;s most exclusive network of senior operators, researchers, and technologists.
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+                    Monetize your deep domain expertise without the grind of traditional employment. We handle the sales, ops, and AI infrastructure—you deliver the insight.
+                  </p>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => {
+                        setPendingRedirect("/profile");
+                        setShowLogin(true);
+                      }}
+                      className="bg-foreground text-background hover:bg-muted transition-colors px-5 py-2.5 rounded-lg text-sm font-bold"
+                    >
+                      Join as Expert
+                    </button>
+                  </div>
+                </div>
+                <div className="bg-accent/5 p-8 flex items-center justify-center border-t md:border-t-0 md:border-l border-border">
+                  <div className="space-y-4 w-full max-w-xs">
+                    <div className="flex items-center gap-4 p-3 bg-background rounded-lg border border-border/50 shadow-sm">
+                      <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold">1</div>
+                      <div>
+                        <div className="text-xs font-bold">Apply</div>
+                        <div className="text-[10px] text-muted-foreground">Submit your credentials</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 p-3 bg-background rounded-lg border border-border/50 shadow-sm">
+                      <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold">2</div>
+                      <div>
+                        <div className="text-xs font-bold">Vet</div>
+                        <div className="text-[10px] text-muted-foreground">Peer review & interview</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 p-3 bg-background rounded-lg border border-border/50 shadow-sm">
+                      <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold">3</div>
+                      <div>
+                        <div className="text-xs font-bold">Deploy</div>
+                        <div className="text-[10px] text-muted-foreground">Match with high-value projects</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </ChatMessage>
         </section>

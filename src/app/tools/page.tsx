@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -21,8 +22,8 @@ export default function ToolsPage() {
                 const q = query(collection(db, "tools"), where("status", "in", ["published", "featured"]));
                 const querySnapshot = await getDocs(q);
                 const tools = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    id: doc.id
                 }));
                 setAllTools(tools);
             } catch (error) {
@@ -52,9 +53,10 @@ export default function ToolsPage() {
                 {/* Tools Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {allTools.map((tool) => (
-                        <div
+                        <Link
                             key={tool.id}
-                            className="group bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all cursor-pointer"
+                            href={`/tools/${tool.id}`}
+                            className="group bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all cursor-pointer block"
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300 overflow-hidden">
@@ -75,7 +77,7 @@ export default function ToolsPage() {
                             </h3>
 
                             <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                                {tool.description}
+                                {tool.excerpt || tool.description}
                             </p>
 
                             <div className="flex items-center gap-2 text-xs font-medium text-accent opacity-0 group-hover:opacity-100 transition-opacity">
@@ -85,7 +87,7 @@ export default function ToolsPage() {
                                     <polyline points="12 5 19 12 12 19" />
                                 </svg>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
 

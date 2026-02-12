@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import Link from "next/link";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -14,8 +15,8 @@ export default function AIToolsPage() {
                 const q = query(collection(db, "tools"), where("status", "==", "featured"));
                 const querySnapshot = await getDocs(q);
                 const dynamicTools = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    id: doc.id
                 }));
                 setTools(dynamicTools);
             } catch (error) {
@@ -39,9 +40,10 @@ export default function AIToolsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {tools.map((tool) => (
-                    <div
+                    <Link
                         key={tool.id}
-                        className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer"
+                        href={`/tools/${tool.id}`}
+                        className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer block"
                     >
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-300 overflow-hidden">
@@ -67,7 +69,7 @@ export default function AIToolsPage() {
                         </h4>
 
                         <p className="text-xs text-muted-foreground leading-relaxed flex-1">
-                            {tool.description}
+                            {tool.excerpt || tool.description}
                         </p>
 
                         <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
@@ -86,7 +88,7 @@ export default function AIToolsPage() {
                                 <path d="M7 17L17 7M17 7H7M17 7v10" />
                             </svg>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
 

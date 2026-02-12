@@ -16,8 +16,8 @@ export default function IdeasPage() {
                 const q = query(collection(db, "ideas"), where("status", "in", ["published", "featured"]));
                 const querySnapshot = await getDocs(q);
                 const ideas = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    id: doc.id
                 }));
                 setAllIdeas(ideas);
             } catch (error) {
@@ -47,14 +47,12 @@ export default function IdeasPage() {
                 {/* Ideas Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {allIdeas.map((idea) => (
-                        <a
+                        <Link
                             key={idea.id}
-                            href={idea.url || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block h-full"
+                            href={`/ideas/${idea.id}`}
+                            className="block h-full group"
                         >
-                            <div className="group bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer">
+                            <div className="bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer">
                                 <div className="flex flex-wrap gap-2 mb-3">
                                     {idea.tags?.map((tag: string, index: number) => (
                                         <span
@@ -90,7 +88,7 @@ export default function IdeasPage() {
                                     </svg>
                                 </div>
                             </div>
-                        </a>
+                        </Link>
                     ))}
                 </div>
             </div>

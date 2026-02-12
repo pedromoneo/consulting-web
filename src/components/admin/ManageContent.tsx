@@ -25,8 +25,8 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
         const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
+                ...doc.data(),
+                id: doc.id
             }));
             setItems(data);
             setLoading(false);
@@ -74,13 +74,35 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
         }
     };
 
-    const deleteItem = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this item? This cannot be undone.")) return;
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+    const checkDelete = (id: string) => {
+        setItemToDelete(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!itemToDelete) return;
+
+        const id = itemToDelete;
+        setDeletingId(id);
+        setItemToDelete(null); // Close modal
+
+        // Optimistic update
+        const previousItems = [...items];
+        setItems(prev => prev.filter(i => i.id !== id));
+
+        console.log(`Attempting to delete item ${id} from collection ${collectionName}`);
+
         try {
             await deleteDoc(doc(db, collectionName, id));
+            console.log(`Successfully deleted item ${id}`);
         } catch (error) {
             console.error("Error deleting item:", error);
-            alert("Failed to delete item");
+            alert("Failed to delete item: " + (error as any).message);
+            setItems(previousItems); // Revert on error
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -93,11 +115,45 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
     );
 
     return (
-        <div className="border border-border rounded-xl overflow-hidden overflow-x-auto mt-8 bg-surface/50 backdrop-blur-sm">
-            <div className="bg-background px-4 py-3 border-b border-border text-left">
+        <div className="border border-border rounded-xl overflow-hidden overflow-x-auto mt-8 bg-surface/50 backdrop-blur-sm relative">
+            {itemToDelete && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
+                    <div className="bg-surface border border-border rounded-xl p-6 shadow-2xl max-w-sm w-full space-y-4">
+                        <div className="space-y-2 text-center">
+                            <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto mb-3">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-bold text-foreground">Delete Item?</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Are you sure you want to delete this item? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={() => setItemToDelete(null)}
+                                className="px-4 py-2 rounded-lg bg-muted/10 hover:bg-muted/20 text-muted-foreground font-bold text-xs transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold text-xs transition-colors shadow-lg shadow-red-500/20"
+                            >
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-background px-4 py-3 border-b border-border text-left flex justify-between items-center">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-accent">Manage {collectionName}</h4>
+                <span className="text-[10px] text-muted-foreground font-mono bg-muted/10 px-2 py-0.5 rounded">{items.length} items</span>
             </div>
             <table className="w-full text-left text-xs">
+                {/* ... (thead remains same) ... */}
                 <thead className="bg-background border-b border-border">
                     <tr>
                         {columns.map(col => (
@@ -134,7 +190,7 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
                 </thead>
                 <tbody className="divide-y divide-border">
                     {sortedItems.map((item) => (
-                        <tr key={item.id} className="transition-colors group text-left hover:bg-white/50">
+                        <tr key={item.id} className={`transition-colors text-left hover:bg-white/50 ${deletingId === item.id ? 'opacity-50 pointer-events-none' : ''}`}>
                             {columns.map(col => (
                                 <td key={col.key} className="px-4 py-4 font-medium text-foreground whitespace-nowrap">
                                     {col.render ? col.render(item) : item[col.key]}
@@ -161,6 +217,7 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
                                             onClick={() => onEdit(item)}
                                             className="text-muted hover:text-accent transition-colors p-1"
                                             title="Edit"
+                                            disabled={deletingId === item.id}
                                         >
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -169,14 +226,19 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
                                         </button>
                                     )}
                                     <button
-                                        onClick={() => deleteItem(item.id)}
+                                        onClick={() => checkDelete(item.id)}
                                         className="text-muted hover:text-red-500 transition-colors p-1"
                                         title="Delete"
+                                        disabled={deletingId === item.id}
                                     >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <polyline points="3 6 5 6 21 6" />
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                        </svg>
+                                        {deletingId === item.id ? (
+                                            <div className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <polyline points="3 6 5 6 21 6" />
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
                             </td>

@@ -15,8 +15,8 @@ export default function ExpertsPage() {
                 const q = query(collection(db, "experts"), where("status", "in", ["published", "featured"]));
                 const querySnapshot = await getDocs(q);
                 const expertsData = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    id: doc.id
                 }));
                 setAllExperts(expertsData);
             } catch (error) {
@@ -125,7 +125,7 @@ export default function ExpertsPage() {
                             </div>
 
                             <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-6">
-                                {expert.bio}
+                                {expert.excerpt || expert.bio}
                             </p>
 
                             <div className="flex flex-col gap-4 mt-auto">

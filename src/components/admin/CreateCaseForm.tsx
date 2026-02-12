@@ -16,6 +16,7 @@ export default function CreateCaseForm({ initialData, onComplete, onCancel }: Ca
     const [title, setTitle] = useState(initialData?.title || "");
     const [result, setResult] = useState(initialData?.result || "");
     const [tags, setTags] = useState(initialData?.tags?.join(", ") || "");
+    const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
     const [description, setDescription] = useState(initialData?.description || "");
     const [status, setStatus] = useState(initialData?.status || "published");
     const [isUploading, setIsUploading] = useState(false);
@@ -61,6 +62,7 @@ export default function CreateCaseForm({ initialData, onComplete, onCancel }: Ca
                 title,
                 result,
                 tags: tags.split(",").map((t: string) => t.trim()),
+                excerpt,
                 description,
                 status,
                 updatedAt: serverTimestamp(),
@@ -80,6 +82,7 @@ export default function CreateCaseForm({ initialData, onComplete, onCancel }: Ca
                 setTitle("");
                 setResult("");
                 setTags("");
+                setExcerpt("");
                 setDescription("");
                 setStatus("published");
             }
@@ -163,6 +166,16 @@ export default function CreateCaseForm({ initialData, onComplete, onCancel }: Ca
                             placeholder="AI, Supply Chain, Operations"
                         />
                     </div>
+                </div>
+
+                <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Excerpt (Short Summary)</label>
+                    <textarea
+                        value={excerpt}
+                        onChange={(e) => setExcerpt(e.target.value)}
+                        className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none h-16 resize-none"
+                        placeholder="Brief summary for list view..."
+                    />
                 </div>
 
                 {/* Rich Text Description Area */}
