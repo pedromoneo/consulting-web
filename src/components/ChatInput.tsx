@@ -6,6 +6,7 @@ interface ChatInputProps {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   placeholder?: string;
+  onFocus?: () => void;
 }
 
 export default function ChatInput({
@@ -14,6 +15,7 @@ export default function ChatInput({
   handleSubmit,
   isLoading,
   placeholder = "Tell us about your challenge...",
+  onFocus,
 }: ChatInputProps) {
   return (
     <div className="sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 px-4">
@@ -23,6 +25,7 @@ export default function ChatInput({
             type="text"
             value={input}
             onChange={handleInputChange}
+            onFocus={onFocus}
             placeholder={placeholder}
             className="w-full bg-surface border border-border rounded-xl px-4 py-3.5 pr-12 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
           />

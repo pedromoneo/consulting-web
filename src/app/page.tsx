@@ -14,7 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import FadeIn from "@/components/FadeIn";
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
+import { collection, getDocs, query, where, limit, doc, setDoc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 const services = [
@@ -166,6 +166,22 @@ export default function Home() {
     setMessages((prev) => [...prev, userMsg]);
     setIsChatLoading(true);
 
+    // Save message to Firestore log
+    if (user) {
+      try {
+        const chatRef = doc(db, "users", user.uid, "chatHistory", "current");
+        // Create document if it doesn't exist, or update array
+        await setDoc(chatRef, {
+          messages: arrayUnion(userMsg),
+          updatedAt: Timestamp.now(),
+          userEmail: user.email, // Convenient for summary
+          userName: user.name || user.email || "Unknown"
+        }, { merge: true });
+      } catch (e) {
+        console.error("Failed to log user message", e);
+      }
+    }
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -187,6 +203,19 @@ export default function Home() {
           const { done, value } = await reader.read();
           if (done) {
             console.log("Stream done");
+
+            // Log assistant response after full stream
+            if (user && assistantContent) {
+              try {
+                const chatRef = doc(db, "users", user.uid, "chatHistory", "current");
+                await updateDoc(chatRef, {
+                  messages: arrayUnion({ id: assistantMsgId, role: "assistant", content: assistantContent }),
+                  updatedAt: Timestamp.now()
+                });
+              } catch (e) {
+                console.error("Failed to log assistant response", e);
+              }
+            }
             break;
           }
           const chunk = decoder.decode(value, { stream: true });
@@ -204,6 +233,15 @@ export default function Home() {
       console.error("Chat error:", err);
     } finally {
       setIsChatLoading(false);
+    }
+  };
+
+  const handleChatFocus = () => {
+    if (!user) {
+      setShowLogin(true);
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
     }
   };
 
@@ -756,6 +794,7 @@ export default function Home() {
               setChatInput("");
             }}
             isLoading={isLoading}
+            onFocus={handleChatFocus}
           />
         </div>
       </div>

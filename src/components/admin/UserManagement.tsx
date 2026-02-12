@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import UserChatLogs from "./UserChatLogs";
 
 export default function UserManagement() {
     const [users, setUsers] = useState<any[]>([]);
@@ -10,6 +11,7 @@ export default function UserManagement() {
     const [search, setSearch] = useState("");
     const [sortField, setSortField] = useState<string>("name");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+    const [selectedUserForChat, setSelectedUserForChat] = useState<{ id: string, name: string } | null>(null);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -209,22 +211,30 @@ export default function UserManagement() {
                                     )}
                                 </td>
                                 <td className="px-4 py-3">
-                                    {u.role.includes('Expert') && u.expertStatus !== 'approved' && u.expertStatus !== 'rejected' && (
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleStatusChange(u.id, "approved")}
-                                                className="text-[10px] bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded font-bold transition-colors"
-                                            >
-                                                Approve
-                                            </button>
-                                            <button
-                                                onClick={() => handleStatusChange(u.id, "rejected")}
-                                                className="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-500 px-2 py-1 rounded font-bold transition-colors border border-red-500/20"
-                                            >
-                                                Reject
-                                            </button>
-                                        </div>
-                                    )}
+                                    <div className="flex gap-2 items-center">
+                                        <button
+                                            onClick={() => setSelectedUserForChat({ id: u.id, name: u.name })}
+                                            className="text-[10px] bg-sky-500/10 hover:bg-sky-500/20 text-sky-500 px-2 py-1 rounded font-bold transition-colors border border-sky-500/20"
+                                        >
+                                            Logs
+                                        </button>
+                                        {u.role.includes('Expert') && u.expertStatus !== 'approved' && u.expertStatus !== 'rejected' && (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleStatusChange(u.id, "approved")}
+                                                    className="text-[10px] bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded font-bold transition-colors"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button
+                                                    onClick={() => handleStatusChange(u.id, "rejected")}
+                                                    className="text-[10px] bg-red-500/10 hover:bg-red-500/20 text-red-500 px-2 py-1 rounded font-bold transition-colors border border-red-500/20"
+                                                >
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -258,6 +268,14 @@ export default function UserManagement() {
                         Next
                     </button>
                 </div>
+            )}
+            {/* Chat Logs Modal */}
+            {selectedUserForChat && (
+                <UserChatLogs
+                    userId={selectedUserForChat.id}
+                    userName={selectedUserForChat.name}
+                    onClose={() => setSelectedUserForChat(null)}
+                />
             )}
         </div>
     );

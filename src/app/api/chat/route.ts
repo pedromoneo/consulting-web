@@ -1,7 +1,8 @@
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { streamText, tool } from "ai";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { z } from "zod";
 
 export const maxDuration = 30;
 
@@ -15,6 +16,7 @@ COMPANY PROFILE:
 - Unique Value: University research network (knowledge 18-24mo ahead of market), Programmed Disconnection (we place a permanent leader to sustain work).
 
 INSTRUCTIONS:
+
 1. SCOPE: ONLY discuss Disruptor, our services, our model, and the user's business challenges. Refuse to answer unrelated topics (e.g., "I can only assist with Disruptor-related inquiries.").
 2. BE DIRECTIVE: Your primary objective is to understand the user's specific problem.
    - If the user says "Hi", ask: "Hello. Briefly, what is the biggest challenge your organization is facing right now?"
