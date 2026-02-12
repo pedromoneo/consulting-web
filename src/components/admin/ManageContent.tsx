@@ -20,6 +20,12 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 15;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [collectionName]);
 
     useEffect(() => {
         const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
@@ -64,6 +70,13 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
         if (valA > valB) return direction === "asc" ? 1 : -1;
         return 0;
     });
+
+    // Pagination logic
+    const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
+    const paginatedItems = sortedItems.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
@@ -189,7 +202,7 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                    {sortedItems.map((item) => (
+                    {paginatedItems.map((item) => (
                         <tr key={item.id} className={`transition-colors text-left hover:bg-white/50 ${deletingId === item.id ? 'opacity-50 pointer-events-none' : ''}`}>
                             {columns.map(col => (
                                 <td key={col.key} className="px-4 py-4 font-medium text-foreground whitespace-nowrap">
@@ -246,6 +259,29 @@ export default function ManageContent({ collectionName, columns, onEdit }: Manag
                     ))}
                 </tbody>
             </table>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-background">
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="text-xs px-3 py-1.5 rounded bg-muted/10 hover:bg-muted/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Previous
+                    </button>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="text-xs px-3 py-1.5 rounded bg-muted/10 hover:bg-muted/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

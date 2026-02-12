@@ -154,11 +154,60 @@ export default function Home() {
   }, []);
 
   const { user, loading: authLoading } = useAuth();
-  const { messages, sendMessage, status } = useChat({
-    onError: (err) => console.error("Chat error:", err),
-  });
 
-  const isLoading = status === "streaming" || status === "submitted" || authLoading;
+  // Manual chat implementation to bypass broken useChat hook
+  const [messages, setMessages] = useState<any[]>([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+
+  const handleSendMessage = async (text: string) => {
+    if (!text.trim()) return;
+
+    const userMsg = { id: Date.now().toString(), role: "user", content: text };
+    setMessages((prev) => [...prev, userMsg]);
+    setIsChatLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [...messages, userMsg] }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send message");
+
+      const assistantMsgId = (Date.now() + 1).toString();
+      setMessages((prev) => [...prev, { id: assistantMsgId, role: "assistant", content: "" }]);
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("Stream done");
+            break;
+          }
+          const chunk = decoder.decode(value, { stream: true });
+          console.log("Received chunk:", chunk);
+          assistantContent += chunk;
+
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId ? { ...m, content: assistantContent } : m
+            )
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Chat error:", err);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  const isLoading = isChatLoading || authLoading;
 
   useEffect(() => {
     if (user && pendingRedirect) {
@@ -176,7 +225,16 @@ export default function Home() {
   const handleNavigate = useCallback((id: string) => {
     setActiveSection(id);
     const el = document.getElementById(id);
-    if (el) {
+    const container = document.getElementById("main-scroll-container");
+
+    if (el && container) {
+      const elTop = el.getBoundingClientRect().top;
+      const containerTop = container.getBoundingClientRect().top;
+      container.scrollTo({
+        top: container.scrollTop + (elTop - containerTop) - 20,
+        behavior: "smooth"
+      });
+    } else if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, []);
@@ -238,6 +296,15 @@ export default function Home() {
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <button onClick={() => handleNavigate("services")} className="px-5 py-2.5 bg-accent hover:bg-accent-muted text-white text-sm font-medium rounded-lg transition-all">Explore Our Services</button>
+                    <button
+                      onClick={() => {
+                        setPendingRedirect("/profile");
+                        setShowLogin(true);
+                      }}
+                      className="px-5 py-2.5 bg-foreground text-background hover:bg-muted font-medium rounded-lg transition-all text-sm"
+                    >
+                      Join as Expert
+                    </button>
                     <button onClick={() => handleNavigate("about")} className="px-5 py-2.5 bg-surface hover:bg-surface-hover text-foreground text-sm font-medium rounded-lg border border-border transition-all">How We&apos;re Different</button>
                   </div>
                 </div>
@@ -248,9 +315,6 @@ export default function Home() {
 
         <SectionDivider id="model-divider" />
 
-        {/* ========================= */}
-        {/* SECTION: OUR MODEL        */}
-        {/* ========================= */}
         <section id="model" className="scroll-mt-3">
           <ChatMessage type="assistant">
             <div>
@@ -519,6 +583,55 @@ export default function Home() {
                 </ul>
               </div>
             </div>
+
+            <div className="mt-12 max-w-2xl mx-auto">
+              <div className="bg-surface rounded-xl border border-border p-6 sm:p-8">
+                <h4 className="text-xl font-bold mb-6 text-center">Ready to start? Tell us about your project.</h4>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    // In a real app, send data to backend
+                    alert("Thanks for reaching out! We'll be in touch shortly.");
+                    (e.target as HTMLFormElement).reset();
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-foreground">Name</label>
+                      <input name="name" type="text" required placeholder="John Doe" className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-foreground">Email</label>
+                      <input name="email" type="email" required placeholder="john@company.com" className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-foreground">Company Name</label>
+                      <input name="company" type="text" placeholder="Acme Inc." className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-foreground">Position</label>
+                      <input name="position" type="text" placeholder="CEO / Founder" className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-foreground">Phone Number</label>
+                    <input name="phone" type="tel" placeholder="+1 (555) 000-0000" className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-accent outline-none" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-foreground">Project Description</label>
+                    <textarea name="description" required rows={4} placeholder="What are you looking to achieve?" className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-accent outline-none resize-none" />
+                  </div>
+                  <div className="pt-2">
+                    <button type="submit" className="w-full bg-accent hover:bg-accent-muted text-white font-bold py-3 rounded-lg transition-all shadow-lg shadow-accent/20">
+                      Let&apos;s talk!
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </ChatMessage>
         </section>
 
@@ -617,10 +730,10 @@ export default function Home() {
           <>
             <SectionDivider id="chat-divider" />
             <div className="space-y-6">
-              {messages.map((m) => (
+              {messages.map((m: any) => (
                 <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
                   <div className={`max-w-2xl px-5 py-3.5 rounded-2xl ${m.role === "user" ? "bg-accent/10 border border-accent/20" : "bg-surface border border-border"}`}>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{(m as any).content}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-800 dark:text-zinc-200 min-h-[1.5em]">{m.content || " "}</p>
                   </div>
                 </div>
               ))}
@@ -636,10 +749,10 @@ export default function Home() {
             input={chatInput}
             handleInputChange={(e) => setChatInput(e.target.value)}
             placeholder={placeholders[activeSection as keyof typeof placeholders] || placeholders.home}
-            handleSubmit={(e) => {
+            handleSubmit={async (e) => {
               e.preventDefault();
               if (!chatInput.trim() || isLoading) return;
-              sendMessage({ text: chatInput.trim() });
+              await handleSendMessage(chatInput);
               setChatInput("");
             }}
             isLoading={isLoading}

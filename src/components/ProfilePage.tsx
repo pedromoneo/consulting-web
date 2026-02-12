@@ -32,6 +32,7 @@ export default function ProfilePage({
 
     // Expert-specific fields
     const [expertBio, setExpertBio] = useState("");
+    const [expertStatus, setExpertStatus] = useState<string>("pending");
 
     // Fellow-specific fields
     const [fellowUniversity, setFellowUniversity] = useState("");
@@ -72,6 +73,7 @@ export default function ProfilePage({
                     if (data.expertProfile) {
                         setIsExpert(true);
                         setExpertBio(data.expertProfile.bio || "");
+                        setExpertStatus(data.expertProfile.status || "pending");
                     }
 
                     // Fellow data
@@ -120,6 +122,9 @@ export default function ProfilePage({
             }
 
             if (isExpert) {
+                // Preserve existing status if updating, default to pending for new
+                const existingStatus = user?.uid ? (await getDoc(doc(db, "users", user.uid))).data()?.expertProfile?.status : "pending";
+
                 updates.expertProfile = {
                     firstName,
                     lastName,
@@ -127,6 +132,7 @@ export default function ProfilePage({
                     phone,
                     linkedin,
                     bio: expertBio,
+                    status: existingStatus || "pending",
                     updatedAt: new Date().toISOString()
                 };
             }
@@ -346,7 +352,19 @@ export default function ProfilePage({
                                     <h4 className="font-semibold text-foreground">Expert Details</h4>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className={labelClass}>Professional Bio / Expertise</label>
+                                    <div className="flex items-center justify-between">
+                                        <label className={labelClass}>Professional Bio / Expertise</label>
+                                        {expertStatus && (
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${expertStatus === 'approved' ? 'bg-green-500/10 text-green-600 border border-green-500/20' :
+                                                expertStatus === 'rejected' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
+                                                    'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20'
+                                                }`}>
+                                                {expertStatus === 'pending' ? 'Application Pending' :
+                                                    expertStatus === 'approved' ? 'Verified Expert' :
+                                                        'Application Rejected'}
+                                            </span>
+                                        )}
+                                    </div>
                                     <textarea
                                         value={expertBio}
                                         onChange={(e) => setExpertBio(e.target.value)}

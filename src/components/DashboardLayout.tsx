@@ -46,8 +46,16 @@ export default function DashboardLayout({
     const handleNavigate = (id: string) => {
         if (pathname === "/") {
             const el = document.getElementById(id);
-            if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "start" });
+            const container = document.getElementById("main-scroll-container");
+
+            if (el && container) {
+                const elTop = el.getBoundingClientRect().top;
+                const containerTop = container.getBoundingClientRect().top;
+                // Scroll the container to align element to top, with 20px padding
+                container.scrollTo({
+                    top: container.scrollTop + (elTop - containerTop) - 20,
+                    behavior: "smooth"
+                });
                 return;
             }
         }
@@ -82,7 +90,7 @@ export default function DashboardLayout({
                     <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                         <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                         <span className="text-xs font-mono text-muted">
-                            disruptor.consulting
+                            {activeSection === "home" ? "/home" : `/${activeSection}`}
                         </span>
                     </Link>
                     <div className="flex-1" />
@@ -96,7 +104,7 @@ export default function DashboardLayout({
                 </header>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto">
+                <div id="main-scroll-container" className="flex-1 overflow-y-auto">
                     {children}
                 </div>
             </main>

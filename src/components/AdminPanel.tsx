@@ -9,8 +9,9 @@ import CreateExpertForm from "./admin/CreateExpertForm";
 import UserManagement from "./admin/UserManagement";
 import ManageContent from "./admin/ManageContent";
 import DataMigration from "./admin/DataMigration";
+import SystemPromptForm from "./admin/SystemPromptForm";
 
-type AdminTab = "ideas" | "cases" | "tools" | "experts";
+type AdminTab = "ideas" | "cases" | "tools" | "experts" | "settings";
 
 export default function AdminPanel() {
     const [activeTab, setActiveTab] = useState<AdminTab>("ideas");
@@ -79,8 +80,23 @@ export default function AdminPanel() {
 
     const caseColumns = [
         { key: "title", label: "Title" },
-        { key: "sector", label: "Sector" },
-        { key: "result", label: "Result" },
+        {
+            key: "createdAt",
+            label: "Date",
+            render: (item: any) => item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleDateString() : "N/A"
+        },
+        {
+            key: "tags",
+            label: "Tags",
+            render: (item: any) => (
+                <div className="flex gap-1 flex-wrap max-w-[200px]">
+                    {item.tags?.slice(0, 2).map((t: string, i: number) => (
+                        <span key={i} className="text-[9px] bg-muted/20 px-1 py-0.5 rounded text-muted-foreground">{t}</span>
+                    ))}
+                    {item.tags?.length > 2 && <span className="text-[9px] text-muted-foreground">+{item.tags.length - 2}</span>}
+                </div>
+            )
+        }
     ];
 
     return (
@@ -98,7 +114,7 @@ export default function AdminPanel() {
                     </div>
 
                     <div className="flex bg-background/50 p-1 rounded-lg border border-border overflow-x-auto max-w-full">
-                        {["ideas", "cases", "tools", "experts"].map((tab) => (
+                        {["ideas", "cases", "tools", "experts", "settings"].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => handleTabChange(tab as AdminTab)}
@@ -145,6 +161,9 @@ export default function AdminPanel() {
                                 onComplete={() => setEditingItem(null)}
                                 onCancel={() => setEditingItem(null)}
                             />
+                        )}
+                        {activeTab === "settings" && (
+                            <SystemPromptForm />
                         )}
                     </div>
 
