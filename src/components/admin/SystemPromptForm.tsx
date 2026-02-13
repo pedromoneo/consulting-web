@@ -123,7 +123,7 @@ export default function SystemPromptForm({ onComplete, onCancel }: SystemPromptF
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     rows={15}
-                    className="w-full px-4 py-3 bg-white dark:bg-black border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
+                    className="w-full px-4 py-3 bg-white border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all font-mono text-sm"
                     placeholder="Enter strict system instructions here..."
                     required
                 />

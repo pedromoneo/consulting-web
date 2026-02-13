@@ -818,7 +818,7 @@ export default function Home() {
               {messages.map((m: any) => (
                 <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
                   <div className={`max-w-2xl px-5 py-3.5 rounded-2xl ${m.role === "user" ? "bg-accent/10 border border-accent/20" : "bg-surface border border-border"}`}>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-800 dark:text-zinc-200 min-h-[1.5em]">{m.content || " "}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground min-h-[1.5em]">{m.content || " "}</p>
                   </div>
                 </div>
               ))}
