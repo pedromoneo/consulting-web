@@ -223,7 +223,7 @@ export default function DataMigration() {
 
                 {showConfirm && (
                     <div className="flex flex-col gap-3 animate-fade-in">
-                        <p className="text-xs font-medium text-red-600">
+                        <p className="text-xs font-medium text-red-600 dark:text-red-400">
                             Warning: This will create duplicates if already run. Are you sure?
                         </p>
                         <div className="flex gap-2">

@@ -79,10 +79,18 @@ export async function POST(req: Request) {
 
     // Transform messages to Gemini format
     // Exclude the last message which is the current prompt
-    const history = messages.slice(0, -1).map((m: any) => ({
+    // Transform messages to Gemini format
+    // Exclude the last message which is the current prompt
+    let history = messages.slice(0, -1).map((m: any) => ({
       role: m.role === "user" ? "user" : "model",
       parts: [{ text: m.content }],
     }));
+
+    // Gemini API requires the first message to be from the user
+    // Remove any leading model messages from history
+    while (history.length > 0 && history[0].role === "model") {
+      history.shift();
+    }
 
     const lastMessageContent = messages[messages.length - 1].content;
 
