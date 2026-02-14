@@ -16,6 +16,7 @@ import Link from "next/link";
 import FadeIn from "@/components/FadeIn";
 import { collection, getDocs, getDoc, query, where, limit, doc, setDoc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import ChatPanel from "@/components/ChatPanel";
 
 const services = [
   {
@@ -123,6 +124,7 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatInput, setChatInput] = useState("");
   const [allExperts, setAllExperts] = useState<any[]>([]);
@@ -294,6 +296,14 @@ export default function Home() {
 
   const isLoading = isChatLoading || authLoading;
 
+  const toggleChat = () => {
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+    setIsChatOpen(!isChatOpen);
+  };
+
   useEffect(() => {
     if (user && pendingRedirect) {
       router.push(pendingRedirect);
@@ -343,6 +353,17 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  const chatPanel = (
+    <ChatPanel
+      isOpen={isChatOpen}
+      onClose={() => setIsChatOpen(false)}
+      messages={messages}
+      onSendMessage={handleSendMessage}
+      isLoading={isLoading}
+      userContextString={userContextString}
+    />
+  );
+
   return (
     <DashboardLayout
       activeSection={activeSection}
@@ -350,6 +371,8 @@ export default function Home() {
       setIsSidebarOpen={setSidebarOpen}
       isLoginOpen={showLogin}
       setIsLoginOpen={setShowLogin}
+      onChatToggle={toggleChat}
+      chatPanel={chatPanel}
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-48">
         {/* ========================= */}
@@ -811,39 +834,6 @@ export default function Home() {
           </ChatMessage>
         </section>
 
-        {messages.length > 0 && (
-          <>
-            <SectionDivider id="chat-divider" />
-            <div className="space-y-6">
-              {messages.map((m: any) => (
-                <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
-                  <div className={`max-w-2xl px-5 py-3.5 rounded-2xl ${m.role === "user" ? "bg-accent/10 border border-accent/20" : "bg-surface border border-border"}`}>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-800 dark:text-zinc-200 min-h-[1.5em]">{m.content || " "}</p>
-                  </div>
-                </div>
-              ))}
-              <div ref={chatEndRef} />
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="fixed bottom-0 left-0 lg:left-64 right-0 p-4 bg-white border-t border-border z-10">
-        <div className="max-w-3xl mx-auto">
-          <ChatInput
-            input={chatInput}
-            handleInputChange={(e) => setChatInput(e.target.value)}
-            placeholder={placeholders[activeSection as keyof typeof placeholders] || placeholders.home}
-            handleSubmit={async (e) => {
-              e.preventDefault();
-              if (!chatInput.trim() || isLoading) return;
-              await handleSendMessage(chatInput);
-              setChatInput("");
-            }}
-            isLoading={isLoading}
-            onFocus={handleChatFocus}
-          />
-        </div>
       </div>
     </DashboardLayout>
   );

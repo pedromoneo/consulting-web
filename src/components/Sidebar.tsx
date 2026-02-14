@@ -82,12 +82,14 @@ export default function Sidebar({
   isOpen,
   onClose,
   onOpenLogin,
+  onChatToggle,
 }: {
   activeSection: string;
   onNavigate: (id: string) => void;
   isOpen: boolean;
   onClose: () => void;
   onOpenLogin: () => void;
+  onChatToggle?: () => void;
 }) {
   const { user, logout, loading } = useAuth();
 
@@ -149,6 +151,24 @@ export default function Sidebar({
 
         {/* Bottom */}
         <div className="p-4 border-t border-border space-y-3">
+          {/* AI Chat Badge */}
+          {onChatToggle && (
+            <button
+              onClick={onChatToggle}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gradient-to-r from-accent/10 to-transparent border border-accent/20 hover:border-accent/40 hover:from-accent/20 transition-all group"
+            >
+              <div className="w-5 h-5 rounded-md bg-accent flex items-center justify-center shadow-lg shadow-accent/20 group-hover:scale-110 transition-transform">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <div className="text-xs font-bold text-foreground group-hover:text-accent transition-colors">Chat with AI</div>
+                <div className="text-[9px] text-muted-foreground">Always available</div>
+              </div>
+            </button>
+          )}
+
           {/* Auth Section */}
           {user ? (
             <div className="space-y-2">

@@ -13,6 +13,8 @@ interface DashboardLayoutProps {
     setIsSidebarOpen?: (open: boolean) => void;
     isLoginOpen?: boolean;
     setIsLoginOpen?: (open: boolean) => void;
+    onChatToggle?: () => void;
+    chatPanel?: React.ReactNode;
 }
 
 export default function DashboardLayout({
@@ -21,7 +23,9 @@ export default function DashboardLayout({
     isSidebarOpen: propSidebarOpen,
     setIsSidebarOpen: propSetSidebarOpen,
     isLoginOpen: propLoginOpen,
-    setIsLoginOpen: propSetLoginOpen
+    setIsLoginOpen: propSetLoginOpen,
+    onChatToggle,
+    chatPanel
 }: DashboardLayoutProps) {
     const [internalSidebarOpen, setInternalSidebarOpen] = useState(false);
     const [internalShowLogin, setInternalShowLogin] = useState(false);
@@ -72,34 +76,51 @@ export default function DashboardLayout({
                 isOpen={sidebarOpen}
                 onClose={() => setSidebarOpen(false)}
                 onOpenLogin={() => setShowLogin(true)}
+                onChatToggle={onChatToggle}
             />
 
-            <main className="flex-1 flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Top Bar */}
-                <header className="h-14 border-b border-border flex items-center px-4 gap-3 bg-surface/50 backdrop-blur-sm flex-shrink-0">
-                    <button
-                        onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden p-2 hover:bg-surface-hover rounded-lg transition-colors"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="3" y1="6" x2="21" y2="6" />
-                            <line x1="3" y1="12" x2="21" y2="12" />
-                            <line x1="3" y1="18" x2="21" y2="18" />
-                        </svg>
-                    </button>
-                    <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                        <span className="text-xs font-mono text-muted">
-                            {activeSection === "home" ? "/home" : `/${activeSection}`}
-                        </span>
-                    </Link>
-                    <div className="flex-1" />
-                    <div className="flex items-center gap-2 text-xs text-muted">
-                        <span className="hidden sm:inline">AI-Native Innovation & Transformation</span>
-                        <div className="w-px h-4 bg-border hidden sm:block" />
-                        <a href="mailto:hello@disruptor.consulting" className="text-accent hover:text-accent-muted transition-colors hidden sm:inline">
-                            Contact
-                        </a>
+                <header className="h-14 border-b border-border flex items-center px-4 gap-3 bg-surface/50 backdrop-blur-sm flex-shrink-0 justify-between">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="lg:hidden p-2 hover:bg-surface-hover rounded-lg transition-colors"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <line x1="3" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        </button>
+                        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                            <span className="text-xs font-mono text-muted">
+                                {activeSection === "home" ? "/home" : `/${activeSection}`}
+                            </span>
+                        </Link>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <div className="hidden sm:flex items-center gap-2 text-xs text-muted pr-4">
+                            <span>AI-Native Innovation & Transformation</span>
+                            <div className="w-px h-4 bg-border" />
+                            <a href="mailto:hello@disruptor.consulting" className="text-accent hover:text-accent-muted transition-colors">
+                                Contact
+                            </a>
+                        </div>
+
+                        {/* Mobile Chat Button (Always visible on mobile) */}
+                        {onChatToggle && (
+                            <button
+                                onClick={onChatToggle}
+                                className="lg:hidden p-2 hover:bg-surface-hover rounded-lg transition-colors text-accent relative"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </header>
 
@@ -114,6 +135,7 @@ export default function DashboardLayout({
                 isOpen={showLogin}
                 onClose={() => setShowLogin(false)}
             />
+            {chatPanel}
         </div>
     );
 }
