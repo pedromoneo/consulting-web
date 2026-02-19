@@ -49,7 +49,7 @@ export default function IdeasPage() {
                     {allIdeas.map((idea) => (
                         <Link
                             key={idea.id}
-                            href={`/ideas/${idea.id}`}
+                            href={`/ideas/view?id=${idea.id}`}
                             className="block h-full group"
                         >
                             <div className="bg-surface rounded-xl border border-border p-6 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer">

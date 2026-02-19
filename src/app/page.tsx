@@ -229,7 +229,7 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch("https://us-central1-consultingweb-9143e.cloudfunctions.net/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -581,7 +581,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               {featuredIdeas.map((idea, i) => (
                 <FadeIn key={i} delay={i * 100}>
-                  <Link href={`/ideas/${idea.id}`} className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all block h-full">
+                  <Link href={`/ideas/view?id=${idea.id}`} className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all block h-full">
                     <span className="text-[10px] font-mono text-muted block mb-2">{idea.date}</span>
                     <h4 className="text-base font-bold group-hover:text-accent transition-colors mb-2">{idea.title}</h4>
                     <p className="text-xs text-muted-foreground leading-relaxed">{idea.excerpt}</p>
@@ -606,7 +606,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               {featuredCases.map((c, i) => (
                 <FadeIn key={i} delay={i * 150}>
-                  <Link href={`/cases/${c.id}`} className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all block h-full">
+                  <Link href={`/cases/view?id=${c.id}`} className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 transition-all block h-full">
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className="text-[10px] uppercase tracking-wider font-bold text-muted bg-surface-hover px-2 py-0.5 rounded">{c.sector}</span>
                     </div>

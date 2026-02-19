@@ -43,7 +43,7 @@ export default function UserChatLogs({ userId, userName, onClose }: UserChatLogs
         if (messages.length === 0) return;
         setAnalyzing(true);
         try {
-            const response = await fetch("/api/analyze-chat", {
+            const response = await fetch("https://us-central1-consultingweb-9143e.cloudfunctions.net/analyzeChat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

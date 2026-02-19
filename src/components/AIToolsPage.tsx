@@ -42,7 +42,7 @@ export default function AIToolsPage() {
                 {tools.map((tool) => (
                     <Link
                         key={tool.id}
-                        href={`/tools/${tool.id}`}
+                        href={`/tools/view?id=${tool.id}`}
                         className="group bg-surface rounded-xl border border-border p-5 hover:border-accent/40 hover:shadow-lg transition-all h-full flex flex-col cursor-pointer block"
                     >
                         <div className="flex items-center gap-3 mb-3">
