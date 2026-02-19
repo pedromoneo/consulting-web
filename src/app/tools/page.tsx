@@ -77,7 +77,7 @@ export default function ToolsPage() {
                             </h3>
 
                             <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                                {tool.excerpt || tool.description}
+                                {tool.excerpt || (tool.description ? tool.description.replace(/<[^>]*>?/gm, '').substring(0, 200) + "..." : "")}
                             </p>
 
                             <div className="flex items-center gap-2 text-xs font-medium text-accent opacity-0 group-hover:opacity-100 transition-opacity">

@@ -87,9 +87,10 @@ export default function ToolDetailPage() {
                         </div>
                     </div>
 
-                    <div className="prose prose-invert prose-lg max-w-none text-muted-foreground">
-                        <p className="whitespace-pre-wrap">{tool.description}</p>
-                    </div>
+                    <div
+                        className="prose prose-invert prose-lg max-w-none text-muted-foreground"
+                        dangerouslySetInnerHTML={{ __html: tool.description }}
+                    />
 
                     {tool.link && (
                         <div className="mt-12 pt-8 border-t border-border flex justify-end">

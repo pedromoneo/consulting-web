@@ -1,5 +1,7 @@
 "use client";
 
+import RichTextEditor from "./RichTextEditor";
+
 import { useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "@/lib/firebase";
@@ -187,11 +189,16 @@ export default function CreateToolForm({ initialData, onComplete, onCancel }: To
 
                 <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Description (Full Text)</label>
-                    <textarea
+                    <RichTextEditor
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none h-24 resize-none"
+                        onChange={setDescription}
+                        onImageUpload={async (file: File) => {
+                            const storageRef = ref(storage, `tools/${Date.now()}_${file.name}`);
+                            await uploadBytes(storageRef, file);
+                            return await getDownloadURL(storageRef);
+                        }}
                         placeholder="Real-time analysis of industry trends..."
+                        className="min-h-[200px]"
                     />
                 </div>
 

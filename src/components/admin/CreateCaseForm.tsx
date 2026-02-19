@@ -1,5 +1,7 @@
 "use client";
 
+import RichTextEditor from "./RichTextEditor";
+
 import { useState } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "@/lib/firebase";
@@ -23,31 +25,6 @@ export default function CreateCaseForm({ initialData, onComplete, onCancel }: Ca
     const [isSaving, setIsSaving] = useState(false);
     const [published, setPublished] = useState(false);
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setIsUploading(true);
-        try {
-            const storageRef = ref(storage, `cases/${Date.now()}_${file.name}`);
-            await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
-
-            const imgTag = `\n![${file.name}](${url})\n`;
-            setDescription((prev: string) => prev + imgTag);
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            alert("Failed to upload image.");
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
-    const formatText = (command: string) => {
-        if (command === 'bold') setDescription((prev: string) => prev + ' **text** ');
-        if (command === 'italic') setDescription((prev: string) => prev + ' *text* ');
-        if (command === 'h2') setDescription((prev: string) => prev + '\n## Heading\n');
-    };
 
     const handlePublish = async () => {
         if (!title || !description) {
@@ -180,28 +157,16 @@ export default function CreateCaseForm({ initialData, onComplete, onCancel }: Ca
 
                 {/* Rich Text Description Area */}
                 <div className="space-y-1.5">
-                    <div className="flex items-center justify-between mb-1">
-                        <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Description (Rich Text / Markdown)</label>
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => formatText('bold')} className="p-1.5 hover:bg-surface rounded text-xs border border-border" title="Bold">B</button>
-                            <button onClick={() => formatText('italic')} className="p-1.5 hover:bg-surface rounded text-xs border border-border italic" title="Italic">I</button>
-                            <button onClick={() => formatText('h2')} className="p-1.5 hover:bg-surface rounded text-xs border border-border font-bold" title="H2">H2</button>
-                            <label className="cursor-pointer p-1.5 hover:bg-surface rounded text-xs border border-border flex items-center gap-1">
-                                {isUploading ? '...' : (
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
-                                    </svg>
-                                )}
-                                Image
-                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
-                            </label>
-                        </div>
-                    </div>
-                    <textarea
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest">Description</label>
+                    <RichTextEditor
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="w-full bg-background border border-border rounded-lg px-4 py-2 text-sm focus:ring-1 focus:ring-accent outline-none h-64 font-mono"
-                        placeholder="Detail the case study... supports Markdown."
+                        onChange={setDescription}
+                        onImageUpload={async (file: File) => {
+                            const storageRef = ref(storage, `cases/${Date.now()}_${file.name}`);
+                            await uploadBytes(storageRef, file);
+                            return await getDownloadURL(storageRef);
+                        }}
+                        placeholder="Detail the case study..."
                     />
                 </div>
 

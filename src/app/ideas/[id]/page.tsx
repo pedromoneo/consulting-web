@@ -81,9 +81,10 @@ export default function IdeaDetailPage() {
                         )}
                     </div>
 
-                    <div className="prose prose-invert prose-lg max-w-none text-muted-foreground">
-                        <p className="whitespace-pre-wrap">{idea.content}</p>
-                    </div>
+                    <div
+                        className="prose prose-invert prose-lg max-w-none text-muted-foreground"
+                        dangerouslySetInnerHTML={{ __html: idea.content }}
+                    />
 
                     <div className="mt-12 pt-8 border-t border-border bg-accent/5 -mx-8 -mb-8 p-8 rounded-b-2xl">
                         <h3 className="text-lg font-bold text-foreground mb-4">Interested in this topic?</h3>

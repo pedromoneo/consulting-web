@@ -69,7 +69,7 @@ export default function IdeasPage() {
                                     {idea.title}
                                 </h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                                    {idea.excerpt || idea.content?.substring(0, 150) + "..."}
+                                    {idea.excerpt || (idea.content ? idea.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + "..." : "")}
                                 </p>
                                 <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                                     <span className="text-xs font-bold text-accent uppercase tracking-widest">

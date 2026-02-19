@@ -69,7 +69,7 @@ export default function CasesPage() {
                                     {c.title}
                                 </h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">
-                                    {c.excerpt || c.description?.substring(0, 200)}
+                                    {c.excerpt || (c.description ? c.description.replace(/<[^>]*>?/gm, '').substring(0, 200) + "..." : "")}
                                 </p>
 
                                 {c.result && (
